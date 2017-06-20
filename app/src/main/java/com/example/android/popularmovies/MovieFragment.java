@@ -1,53 +1,50 @@
 package com.example.android.popularmovies;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.squareup.picasso.Picasso;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 /**
  * Fragment to add movie images to gridview
  */
 
 public class MovieFragment extends Fragment {
-    private View rootView;
-    private MovieAdapter mMovieAdapter;
-    private GridView gridView;
-    private ArrayList<Movie> mMovieArrayList = new ArrayList<Movie>();
+    @Bind(R.id.detail_image_view)ImageView imageView;
+    @Bind(R.id.detail_title_view)TextView titleView;
+    @Bind(R.id.detail_date_view)TextView dateView;
+    @Bind(R.id.detail_rating_view)TextView ratingView;
+    @Bind(R.id.detail_synopsis_view)TextView summaryView;
+
+    public MovieFragment() {}
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-
-        switch (itemId) {
-            case R.id.sort_order:
-                Intent settingsIntent = new Intent(getActivity(), Settings.class);
-                return true;
-        }
-        return onOptionsItemSelected(item);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.activity_movie, container, false);
-        gridView = (GridView) rootView.findViewById(R.id.image_grid_view);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.movie_details, container, false);
+        //Butter knife library for binding views
+        ButterKnife.bind(this, rootView);
+        Movie movie = getActivity().getIntent().getParcelableExtra("movie");
+        //Setting back poster of movie
+        Picasso.with(getActivity()).load(movie.getImagePoster()).into(imageView);
+        //Setting title of movie
+        titleView.setText(movie.getTitle());
+        //Setting release date of movie
+        dateView.setText(movie.getReleaseInfo());
+        //Setting ratings of movie
+        String text = movie.getRating()+"";
+        ratingView.setText(text);
+        //Setting summary of movie
+        summaryView.setText(movie.getSynopsis());
         return rootView;
     }
 
-    public MovieFragment() {}
 }

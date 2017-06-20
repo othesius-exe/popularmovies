@@ -65,7 +65,7 @@ public class ImageAdapter extends BaseAdapter {
 
         if(convertView==null){
             LayoutInflater inflater = ((MainActivity)mContext).getLayoutInflater();
-            convertView = inflater.inflate(R.layout.activity_movie, parent, false);
+            convertView = inflater.inflate(R.layout.activity_image, parent, false);
             holder = new ViewHolder(convertView);
             holder.imageView = (ImageView)convertView.findViewById(R.id.image_view);
             convertView.setTag(holder);

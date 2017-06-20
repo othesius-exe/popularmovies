@@ -8,4 +8,18 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="detail_page_style">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="synopsis_style">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:maxLines">8</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 </resources>

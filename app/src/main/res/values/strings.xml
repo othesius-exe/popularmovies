@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Popular Movies</string>
+    <string name="title">Title Goes Here:</string>
+    <string name="date">Released on: July 1, 2012</string>
+    <string name="synopsis">This will contain a summary of the movie that has been selected.</string>
 </resources>

@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:numColumns="2"
+    android:id="@+id/movie_grid">
 
-    <GridView
-        android:id="@+id/image_grid_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:stretchMode="columnWidth"
-        android:numColumns="2"
-        android:horizontalSpacing="0dp"
-        android:verticalSpacing="0dp"/>
 
-</FrameLayout>
+</GridView>

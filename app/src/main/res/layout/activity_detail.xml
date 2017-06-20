@@ -5,9 +5,8 @@
 
     <ImageView
         android:id="@+id/detail_image_view"
-        android:layout_width="@dimen/image_list_item_width"
-        android:layout_height="@dimen/image_list_item_height"
-        android:layout_marginLeft="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/detail_image_height"
         android:scaleType="centerCrop"
         android:src="@drawable/broken_link"/>
     <TextView
@@ -28,5 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/synopsis_text_height"
         android:text="@string/synopsis"/>
+
+    <include layout="@layout/detail_fragment"/>
 
 </LinearLayout>

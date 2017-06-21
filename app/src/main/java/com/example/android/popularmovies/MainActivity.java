@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
-    private String API_KEY = "***REMOVED***";
+    private String API_KEY = getString(R.string.apiKey);
     private String POPULAR_PARAM = "popular?";
     private String TOP_RATED_PARAM = "top_rated?";
 

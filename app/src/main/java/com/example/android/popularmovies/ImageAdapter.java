@@ -68,6 +68,7 @@ public class ImageAdapter extends BaseAdapter {
         String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + partialImagePath;
         Picasso.with(mContext).load(fullImagePath).into(imageView);
         Log.v(LOG_TAG, "Inside getView");
+        Log.v(LOG_TAG, "Poster path " + fullImagePath);
         return imageView;
     }
 }

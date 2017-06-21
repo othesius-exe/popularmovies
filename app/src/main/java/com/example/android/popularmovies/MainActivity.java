@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mLoaderManager = getSupportLoaderManager();
         mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
 
+        mMovieList = new ArrayList<>();
+
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -95,8 +97,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
         Log.i(LOG_TAG, "Load finished");
 
+        mMovieList.addAll(data);
+        mImageAdapter.addAll(mMovieList);
+
         if (data != null && !data.isEmpty()) {
-            mImageAdapter.addAll(data);
         }
 
 

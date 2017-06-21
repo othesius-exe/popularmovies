@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Log.i(LOG_TAG, "Load finished");
         mMovieList.clear();
         if (data != null && !data.isEmpty()) {
+            mEmptyView.setVisibility(View.GONE);
             mMovieList.addAll(data);
             mImageAdapter.addAll(mMovieList);
         }

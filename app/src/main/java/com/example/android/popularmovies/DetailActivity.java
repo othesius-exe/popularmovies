@@ -46,7 +46,7 @@ public class DetailActivity extends AppCompatActivity {
 
         mImageView = (ImageView) findViewById(R.id.detail_image_view);
         mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
-        mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         Picasso.with(this).load(fullImagePath).into(mImageView);
 
         mTitleView = (TextView) findViewById(R.id.detail_title_view);

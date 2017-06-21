@@ -24,7 +24,8 @@
         android:numColumns="2" />
 
     <LinearLayout
-        android:visibility="gone"
+        android:layout_marginTop="100dp"
+        android:visibility="visible"
         android:id="@+id/empty_view"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"

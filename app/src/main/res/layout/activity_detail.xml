@@ -8,6 +8,7 @@
     android:fitsSystemWindows="true"
     tools:context=".DetailActivity">
 
+
     <android.support.design.widget.AppBarLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -22,6 +23,46 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/detail_fragment" />
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context=".DetailActivity">
+
+    <ImageView
+        android:src="@drawable/broken_link"
+        android:id="@+id/detail_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/detail_image_height"
+        android:scaleType="center"/>
+
+    <TextView
+        android:id="@+id/detail_title_view"
+        style="@style/detail_page_style"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/detail_text_height"
+        android:text="@string/title"/>
+    <TextView
+        android:id="@+id/detail_date_view"
+        style="@style/detail_page_style"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/detail_text_height"
+        android:text="@string/date"/>
+    <TextView
+        android:id="@+id/detail_rating_view"
+        style="@style/detail_page_style"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/detail_text_height"
+        android:text="@string/rating"/>
+    <TextView
+        android:id="@+id/detail_synopsis_view"
+        style="@style/synopsis_style"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/synopsis_text_height"
+        android:text="@string/synopsis"/>
+    </LinearLayout>
+
 
 </android.support.design.widget.CoordinatorLayout>

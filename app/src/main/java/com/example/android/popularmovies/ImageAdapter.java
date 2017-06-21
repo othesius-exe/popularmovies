@@ -1,18 +1,15 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-
-import butterknife.Bind;
-import butterknife.ButterKnife;
 /**
  * Adapter for Adding Images to A GridView
  */
@@ -26,13 +23,6 @@ public class ImageAdapter extends BaseAdapter {
         mContext = context;
         mMovieList = movies;
         notifyDataSetChanged();
-    }
-
-    static class ViewHolder{
-        @Bind(R.id.image_view)ImageView imageView;
-        public ViewHolder(View view) {
-            ButterKnife.bind(this, view);
-        }
     }
 
     public void addAll(ArrayList movieList) {
@@ -61,18 +51,17 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
 
-        if(convertView==null){
-            LayoutInflater inflater = ((MainActivity)mContext).getLayoutInflater();
-            convertView = inflater.inflate(R.layout.activity_image, parent, false);
-            holder = new ViewHolder(convertView);
-            holder.imageView = (ImageView)convertView.findViewById(R.id.image_view);
-            convertView.setTag(holder);
-        }else{
-            holder = (ViewHolder)convertView.getTag();
+        ImageView imageView;
+        if (convertView == null) {
+            // if it's not recycled, initialize some attributes
+            imageView = new ImageView(mContext);
+            imageView.setLayoutParams(new GridView.LayoutParams(R.dimen.image_list_item_height, R.dimen.image_list_item_width));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        } else {
+            imageView = (ImageView) convertView;
         }
-        Picasso.with(mContext).load(mMovieList.get(position).getImagePoster()).into(holder.imageView);
+        Picasso.with(mContext).load(mMovieList.get(position).getImagePoster()).into(imageView);
         //Log.v(LOG_TAG, "Inside getView");
         return convertView;
     }

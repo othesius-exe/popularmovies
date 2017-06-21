@@ -138,7 +138,6 @@ public final class QueryUtils {
         String date = "";
         String imgUrl = "";
         String synopsis = "";
-        String dateTime;
 
         // Make Sure the JSON isn't empty
         if (TextUtils.isEmpty(movieJson)) {

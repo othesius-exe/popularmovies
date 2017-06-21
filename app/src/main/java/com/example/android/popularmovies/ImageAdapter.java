@@ -41,7 +41,7 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return mMovieList.get(position).getImagePoster();
+        return mMovieList.get(position);
     }
 
     @Override

@@ -88,15 +88,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Log.i(LOG_TAG, "Creating Loader");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        return new MovieLoader(this, "https://api.themoviedb.org/3/movie/search/popular?***REMOVED***");
+        return new MovieLoader(this, "https://api.themoviedb.org/3/movie/popular?***REMOVED***");
     }
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
         Log.i(LOG_TAG, "Load finished");
-        mMovieList.addAll(data);
-        if (mMovieList != null && !mMovieList.isEmpty()) {
-            mImageAdapter.addAll(mMovieList);
+        if (data != null && !data.isEmpty()) {
+
         }
 
 

@@ -19,6 +19,8 @@ public class ImageAdapter extends BaseAdapter {
     private static final String LOG_TAG = ImageAdapter.class.getSimpleName();
     private Context mContext;
     private ArrayList<Movie> mMovieList;
+    private String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/";
+    private String IMAGE_WIDTH = "w185";
 
     public ImageAdapter(Context context, ArrayList<Movie> movies) {
         mContext = context;
@@ -62,7 +64,9 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        Picasso.with(mContext).load(mMovieList.get(position).getImagePoster()).into(imageView);
+        String partialImagePath = mMovieList.get(position).getImagePoster();
+        String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + partialImagePath;
+        Picasso.with(mContext).load(fullImagePath).into(imageView);
         Log.v(LOG_TAG, "Inside getView");
         return imageView;
     }

@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie?";
+    private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie";
     private String API_KEY = "***REMOVED***";
     private String QUERY_PARAM = "&query=";
-    private String DEFAULT_PARAM = "popular";
+    private String DEFAULT_PARAM = "popular?";
 
     private String mFullUrl;
     private static final int MOVIE_LOADER_ID = 1;
@@ -88,15 +88,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Log.i(LOG_TAG, "Creating Loader");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        return new MovieLoader(this, "https://api.themoviedb.org/3/search/movie?***REMOVED***&query=popular");
+        return new MovieLoader(this, "https://api.themoviedb.org/3/movie/search/popular?***REMOVED***");
     }
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
         Log.i(LOG_TAG, "Load finished");
-
-        if (data != null && !data.isEmpty()) {
-            mMovieList.addAll(data);
+        mMovieList.addAll(data);
+        if (mMovieList != null && !mMovieList.isEmpty()) {
+            mImageAdapter.addAll(mMovieList);
         }
 
 

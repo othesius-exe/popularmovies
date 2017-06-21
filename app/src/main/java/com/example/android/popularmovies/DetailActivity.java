@@ -1,10 +1,15 @@
 package com.example.android.popularmovies;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  *
@@ -12,35 +17,51 @@ import android.view.MenuItem;
 
 public class DetailActivity extends AppCompatActivity {
 
+    private String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/";
+    private String IMAGE_WIDTH = "w185";
+
+    private ImageView mImageView;
+    private TextView mTitleView;
+    private TextView mRatingView;
+    private TextView mDateView;
+    private TextView mSynopsisView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+        Intent intent = getIntent();
+        Movie movie = intent.getParcelableExtra("movie");
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        String title = movie.getTitle();
+        Double rating = movie.getRating();
+        String date = movie.getReleaseInfo();
+        String synopsis = movie.getSynopsis();
+        String image = movie.getImagePoster();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            getFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new SettingsActivity())
-                    .commit();
-        }
+        String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + image;
 
-        return super.onOptionsItemSelected(item);
+        mImageView = (ImageView) findViewById(R.id.detail_image_view);
+        mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
+        mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        Picasso.with(this).load(fullImagePath).into(mImageView);
+
+        mTitleView = (TextView) findViewById(R.id.detail_title_view);
+        mTitleView.setText(title);
+
+        mRatingView = (TextView) findViewById(R.id.detail_rating_view);
+        String stringRating = String.valueOf(rating);
+        mRatingView.setText(stringRating);
+
+        mDateView = (TextView) findViewById(R.id.detail_date_view);
+        mDateView.setText(date);
+
+        mSynopsisView = (TextView) findViewById(R.id.detail_synopsis_view);
+        mSynopsisView.setText(synopsis);
+
+
     }
 }

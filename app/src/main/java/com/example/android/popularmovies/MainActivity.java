@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
-    private String API_KEY = getString(R.string.apiKey);
+    private String API_KEY = "";
     private String POPULAR_PARAM = "popular?";
     private String TOP_RATED_PARAM = "top_rated?";
 
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
+        API_KEY = getResources().getString(R.string.apiKey);
         mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY;
 
         mGridView = (GridView) findViewById(R.id.grid_view);
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
 
         mMovieList = new ArrayList<>();
+
+
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 

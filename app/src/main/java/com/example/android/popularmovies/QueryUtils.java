@@ -171,7 +171,7 @@ public final class QueryUtils {
                     date = thisMovie.getString("release_date");
                 }
                 if (thisMovie.has("overview")) {
-                    synopsis = thisMovie.getString("synopsis");
+                    synopsis = thisMovie.getString("overview");
                 }
                 Movie movie = new Movie(title, rating, date, imgUrl, synopsis);
                 movieArrayList.add(movie);

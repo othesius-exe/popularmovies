@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie?";
     private String API_KEY = "***REMOVED***";
     private String QUERY_PARAM = "&query=";
+    private String DEFAULT_PARAM = "popular";
 
     private String mFullUrl;
     private static final int MOVIE_LOADER_ID = 1;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Log.i(LOG_TAG, "Creating Loader");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        return new MovieLoader(this, "https://api.themoviedb.org/3/search/movie?***REMOVED***");
+        return new MovieLoader(this, "https://api.themoviedb.org/3/search/movie?***REMOVED***&query=popular");
     }
 
     @Override

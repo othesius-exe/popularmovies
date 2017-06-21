@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -62,7 +63,7 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
         Picasso.with(mContext).load(mMovieList.get(position).getImagePoster()).into(imageView);
-        //Log.v(LOG_TAG, "Inside getView");
-        return convertView;
+        Log.v(LOG_TAG, "Inside getView");
+        return imageView;
     }
 }

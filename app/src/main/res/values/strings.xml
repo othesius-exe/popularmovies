@@ -12,10 +12,14 @@
     <string name="sort_key">Sort</string>
     <string name="pref_sort_order_key">Sort</string>
 
+    <string name="popular_preference">Popular</string>
+    <string name="rating_preference">Higest Rated</string>
+
     <string-array name="sort_options">
-        <item name="popular">Popular</item>
-        <item name="rating">Highest Rated</item>
+        <item name="popular">@string/popular_preference</item>
+        <item name="rating">@string/rating_preference</item>
     </string-array>
+
     <string-array name="sort_descriptions">
         <item name="popular_desc">Popular</item>
         <item name="rating_desc">Rating</item>

@@ -1,7 +1,6 @@
 package com.example.android.popularmovies;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -10,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
 
         mFullUrl = MOVIE_QUERY_URL + API_KEY;
 
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
 
         mMovieList = new ArrayList<>();
+
+        PreferenceManager.setDefaultValues(this, R.xml.settings_main, false);
 
         ConnectivityManager connectivityManager = (ConnectivityManager)
                 getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -95,7 +99,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(MainActivity.this, Settings.class));
+            getFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, new SettingsActivity())
+                    .commit();
         }
 
         return super.onOptionsItemSelected(item);
@@ -104,7 +110,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
         Log.i(LOG_TAG, "Creating Loader");
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Log.i(LOG_TAG, "Prefs " + sharedPreferences);
 
         return new MovieLoader(this, "https://api.themoviedb.org/3/movie/popular?***REMOVED***");
     }

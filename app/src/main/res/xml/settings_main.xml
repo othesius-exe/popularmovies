@@ -4,7 +4,7 @@
     <ListPreference
         android:key="@string/sort_key"
         android:title="@string/sort_preferences"
-        android:defaultValue="@string/rating"
+        android:defaultValue="@string/rating_preference"
         android:entries="@array/sort_options"
         android:entryValues="@array/sort_descriptions"/>
 

@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie";
+    private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "***REMOVED***";
     private String QUERY_PARAM = "&query=";
     private String DEFAULT_PARAM = "popular?";
@@ -94,8 +94,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
         Log.i(LOG_TAG, "Load finished");
-        if (data != null && !data.isEmpty()) {
 
+        if (data != null && !data.isEmpty()) {
+            mImageAdapter.addAll(data);
         }
 
 
@@ -105,5 +106,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(Loader<List<Movie>> loader) {
         mMovieList.clear();
         mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelableArrayList("movieList", mMovieList);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mMovieList = savedInstanceState.getParcelableArrayList("movieList");
     }
 }

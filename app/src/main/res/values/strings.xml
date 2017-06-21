@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Popular Movies</string>
 
+    <string name="no_connection">You seem to have lost connection</string>
+
     <string name="title">Title Goes Here:</string>
     <string name="date">Released on: July 1, 2012</string>
     <string name="rating">3.7</string>

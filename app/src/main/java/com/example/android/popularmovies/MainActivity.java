@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
-        API_KEY = getResources().getString(R.string.apiKey);
+        API_KEY = getResources().getString(R.string.apiKeys);
         mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY;
 
         mGridView = (GridView) findViewById(R.id.grid_view);

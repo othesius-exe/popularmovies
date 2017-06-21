@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Log.i(LOG_TAG, "Creating Loader");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        return new MovieLoader(this, mFullUrl);
+        return new MovieLoader(this, "https://api.themoviedb.org/3/movie/550?***REMOVED***");
     }
 
     @Override

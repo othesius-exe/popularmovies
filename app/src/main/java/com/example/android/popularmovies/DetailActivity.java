@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "";
-    private String APPEND_VIDEOS = "/videos";
+    private String APPEND_VIDEOS = "&append_to_response=videos";
     private String APPEND_REVIEWS = "&append_to_response=reviews";
     private String mTrailerUrl = "";
     private String mReviewUrl = "";
@@ -68,6 +69,7 @@ public class DetailActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
         mLoaderManager = getSupportLoaderManager();
+        mTrailerList = new ArrayList<>();
 
         API_KEY = getResources().getString(R.string.apiKeys);
 
@@ -90,28 +92,19 @@ public class DetailActivity extends AppCompatActivity {
             String synopsis = movie.getSynopsis();
             String image = movie.getImagePoster();
 
-            mTrailerUrl = MOVIE_QUERY_URL + movieId + APPEND_VIDEOS + QUESTION_KEY + API_KEY;
-            mReviewUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY;
+            mTrailerUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS;
+            mReviewUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_REVIEWS;
             // Start the review and trailer loaders
             if (isConnected) {
                 mLoaderManager.initLoader(TRAILER_LOADER, null, new TrailerCallback());
             }
 
             String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + image;
-            String trailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerId + DEFAULT_KEY;
-            String youtubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
 
             mImageView = (ImageView) findViewById(R.id.detail_image_view);
             mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
             mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             Picasso.with(this).load(fullImagePath).into(mImageView);
-
-            mTrailerImage = (ImageView) findViewById(R.id.trailer_image_view);
-            mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
-            mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Picasso.with(this).load(trailerImagePath).into(mTrailerImage);
-            Log.i(LOG_TAG, "Trailer Image path: " + trailerImagePath);
-            Log.i(LOG_TAG, "Trailer Path: " + youtubeTrailerPath);
 
             mTitleView = (TextView) findViewById(R.id.detail_title_view);
             mTitleView.setText(title);
@@ -172,7 +165,19 @@ public class DetailActivity extends AppCompatActivity {
                 mTrailerList.addAll(data);
                 mTrailerId = mTrailerList.get(0).getTrailerId();
                 mTrailerKey = mTrailerList.get(0).getTrailerKey();
+                Log.i(LOG_TAG, "trailer id: " + mTrailerId);
+                Log.i(LOG_TAG, "trailer key: " + mTrailerKey);
                 mTrailer = new Trailer(mTrailerKey, mTrailerId);
+
+                String trailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerId + DEFAULT_KEY;
+                String youtubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
+
+                mTrailerImage = (ImageView) findViewById(R.id.trailer_image_view);
+                mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
+                mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                Picasso.with(DetailActivity.this).load(trailerImagePath).into(mTrailerImage);
+                Log.i(LOG_TAG, "Trailer Image path: " + trailerImagePath);
+                Log.i(LOG_TAG, "Trailer Path: " + youtubeTrailerPath);
             }
         }
 

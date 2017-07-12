@@ -146,18 +146,13 @@ public class TrailerQueryUtils {
         // Parse the JSON response using key:value pairs to get desired info
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
-            JSONArray movieJsonArray = baseJsonResponse.getJSONArray("results");
-            for (int i = 0; i < movieJsonArray.length(); i ++) {
-                JSONObject thisMovie = movieJsonArray.getJSONObject(i);
-                // Check for videos
-                if (thisMovie.has("videos")) {
-                    // Get the videos Object
-                    JSONObject videosObject = thisMovie.getJSONObject("videos");
-                    // Iterate over the videos array
-                    if (videosObject.has("results")) {
-                        JSONArray videosArray = videosObject.getJSONArray("results");
-                        for (int v = 0; v < videosArray.length(); v++) {
-                            JSONObject thisVideo = videosArray.getJSONObject(v);
+            for (int i = 0; i < baseJsonResponse.length(); i ++) {
+                if (baseJsonResponse.has("videos")) {
+                    JSONObject trailerObject = baseJsonResponse.getJSONObject("videos");
+                    if (trailerObject.has("results")) {
+                        JSONArray trailerArray = trailerObject.getJSONArray("results");
+                        for (int v = 0; v < trailerArray.length(); v++) {
+                            JSONObject thisVideo = trailerArray.getJSONObject(v);
                             if (thisVideo.has("key")) {
                                 trailerKey = thisVideo.getString("key");
                             }
@@ -165,9 +160,7 @@ public class TrailerQueryUtils {
                                 trailerId = thisVideo.getString("id");
                             }
                         }
-
                     }
-
                 }
                 Trailer trailer = new Trailer(trailerKey, trailerId);
                 trailerArrayList.add(trailer);

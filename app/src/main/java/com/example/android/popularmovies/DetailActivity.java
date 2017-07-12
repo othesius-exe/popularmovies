@@ -31,8 +31,10 @@ public class DetailActivity extends AppCompatActivity {
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "";
-    private String APPEND_VIDEOS_AND_REVIEWS = "&append_to_response=videos,reviews";
-    private String mFullUrl = "";
+    private String APPEND_VIDEOS = "/videos";
+    private String APPEND_REVIEWS = "&append_to_response=reviews";
+    private String mTrailerUrl = "";
+    private String mReviewUrl = "";
 
     private String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/";
     private String IMAGE_WIDTH = "w185";
@@ -88,8 +90,8 @@ public class DetailActivity extends AppCompatActivity {
             String synopsis = movie.getSynopsis();
             String image = movie.getImagePoster();
 
-            mFullUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
-
+            mTrailerUrl = MOVIE_QUERY_URL + movieId + APPEND_VIDEOS + QUESTION_KEY + API_KEY;
+            mReviewUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY;
             // Start the review and trailer loaders
             if (isConnected) {
                 mLoaderManager.initLoader(TRAILER_LOADER, null, new TrailerCallback());
@@ -160,7 +162,7 @@ public class DetailActivity extends AppCompatActivity {
 
         @Override
         public Loader<List<Trailer>> onCreateLoader(int id, Bundle args) {
-            return new TrailerLoader(DetailActivity.this, mFullUrl);
+            return new TrailerLoader(DetailActivity.this, mTrailerUrl);
         }
 
         @Override

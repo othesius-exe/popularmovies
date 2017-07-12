@@ -28,7 +28,7 @@ public class TrailerQueryUtils {
     /**
      * Query the Movies API.
      */
-    public static List<Trailer> fetchMovieData(String requestUrl) {
+    public static List<Trailer> fetchTrailerData(String requestUrl) {
 
         // Create a Url Object.
         URL url = createUrl(requestUrl);
@@ -140,7 +140,7 @@ public class TrailerQueryUtils {
             return null;
         }
 
-        // Create an ArrayList to store movies in
+        // Create an ArrayList to store trailers in
         ArrayList<Trailer> trailerArrayList = new ArrayList<>();
 
         // Parse the JSON response using key:value pairs to get desired info

@@ -19,17 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utilities for Querying TMDB API.
+ *
  */
 
-public final class QueryUtils {
-
-    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+public class TrailerQueryUtils {
+    private static final String LOG_TAG = TrailerQueryUtils.class.getSimpleName();
 
     /**
      * Query the Movies API.
      */
-    public static List<Movie> fetchMovieData(String requestUrl) {
+    public static List<Trailer> fetchMovieData(String requestUrl) {
 
         // Create a Url Object.
         URL url = createUrl(requestUrl);
@@ -45,9 +44,9 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from json and create a new Movie object
-        List<Movie> movies = extractMovieFromJson(jsonResponse);
+        List<Trailer> trailers = extractTrailersFromJson(jsonResponse);
 
-        return movies;
+        return trailers;
     }
 
     /**
@@ -132,18 +131,9 @@ public final class QueryUtils {
      * Build a Movie Object from the JSON response
      */
 
-    public static List<Movie> extractMovieFromJson(String movieJson) {
-        String title = "";
-        int movieId = 0;
-        Double rating = 0.0;
-        String date = "";
-        String imgUrl = "";
-        String synopsis = "";
+    public static List<Trailer> extractTrailersFromJson(String movieJson) {
         String trailerKey = "";
         String trailerId = "";
-
-        String author = "";
-        String content = "";
 
         // Make Sure the JSON isn't empty
         if (TextUtils.isEmpty(movieJson)) {
@@ -151,40 +141,14 @@ public final class QueryUtils {
         }
 
         // Create an ArrayList to store movies in
-        ArrayList<Movie> movieArrayList = new ArrayList<>();
-        ArrayList<Review> reviewsArrayList = new ArrayList<>();
+        ArrayList<Trailer> trailerArrayList = new ArrayList<>();
 
         // Parse the JSON response using key:value pairs to get desired info
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
             JSONArray movieJsonArray = baseJsonResponse.getJSONArray("results");
-
-
             for (int i = 0; i < movieJsonArray.length(); i ++) {
                 JSONObject thisMovie = movieJsonArray.getJSONObject(i);
-                // Retrieve the poster url
-                if (thisMovie.has("poster_path")) {
-                    imgUrl = thisMovie.getString("poster_path");
-                }
-                // Retrieve the title
-                if (thisMovie.has("title")) {
-                    title = thisMovie.getString("title");
-                }
-                // Retrieve the id of the movie
-                if (thisMovie.has("id")) {
-                    movieId = thisMovie.getInt("id");
-                }
-                // Retrieve the rating
-                if (thisMovie.has("vote_average")) {
-                    rating = thisMovie.getDouble("vote_average");
-                }
-                // Retrieve the release date
-                if (thisMovie.has("release_date")) {
-                    date = thisMovie.getString("release_date");
-                }
-                if (thisMovie.has("overview")) {
-                    synopsis = thisMovie.getString("overview");
-                }
                 // Check for videos
                 if (thisMovie.has("videos")) {
                     // Get the videos Object
@@ -192,47 +156,28 @@ public final class QueryUtils {
                     // Iterate over the videos array
                     if (videosObject.has("results")) {
                         JSONArray videosArray = videosObject.getJSONArray("results");
-                        JSONObject thisVideo = videosArray.getJSONObject(0);
-                        if (thisVideo.has("key")) {
-                            trailerKey = thisVideo.getString("key");
+                        for (int v = 0; v < videosArray.length(); v++) {
+                            JSONObject thisVideo = videosArray.getJSONObject(v);
+                            if (thisVideo.has("key")) {
+                                trailerKey = thisVideo.getString("key");
+                            }
+                            if (thisVideo.has("id")) {
+                                trailerId = thisVideo.getString("id");
+                            }
                         }
-                        if (thisVideo.has("id")) {
-                            trailerId = thisVideo.getString("id");
-                        }
+
                     }
 
                 }
-                // Check for reviews
-                if (thisMovie.has("reviews")) {
-                    // Get the reviews object
-                    JSONObject reviewObject = thisMovie.getJSONObject("reviews");
-                    // Get the reviews
-                    if (reviewObject.has("results")) {
-                        JSONArray reviewArray = reviewObject.getJSONArray("results");
-                        for (int x = 0; x < 5; x ++) {
-                            JSONObject thisReview = reviewArray.getJSONObject(x);
-                            if (thisReview.has("author")) {
-                                author = thisReview.getString("author");
-                            }
-                            if (thisReview.has("content")) {
-                                content = thisReview.getString("content");
-                            }
-                        }
-                    }
-                }
-                Review review = new Review(author, content);
-                reviewsArrayList.add(review);
-                Movie movie = new Movie(title, rating, date, imgUrl,
-                        synopsis, movieId);
-                movieArrayList.add(movie);
-
+                Trailer trailer = new Trailer(trailerKey, trailerId);
+                trailerArrayList.add(trailer);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(LOG_TAG, "Trouble parsing JSON.");
         }
-        return movieArrayList;
+        return trailerArrayList;
 
     }
 }

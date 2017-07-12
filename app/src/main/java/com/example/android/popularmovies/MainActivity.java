@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "";
+    private String APPEND_VIDEOS_AND_REVIEWS = "&append_to_response=videos,reviews";
     private String POPULAR_PARAM = "popular?";
     private String TOP_RATED_PARAM = "top_rated?";
 
@@ -44,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static String SORT_ORDER = "Sort";
     private static final int SORT_ORDER_POPULAR = 0;
     private static final int SORT_ORDER_TOP_RATED = 1;
+    private static final int SORT_ORDER_FAVORITES = 2;
+
+    private int mMovieId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setSupportActionBar(toolbar);
 
         API_KEY = getResources().getString(R.string.apiKeys);
-        mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY;
+        mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
 
         mGridView = (GridView) findViewById(R.id.grid_view);
         mImageAdapter = new ImageAdapter(this, new ArrayList<Movie>());
@@ -85,12 +89,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent detailIntent = new Intent(MainActivity.this, DetailActivity.class);
+                mMovieId = mMovieList.get(position).getMovieId();
+                mFullUrl = MOVIE_QUERY_URL + mMovieId + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
                 Movie movie = new Movie(mMovieList.get(position).getTitle(),
                         mMovieList.get(position).getRating(),
                         mMovieList.get(position).getReleaseInfo(),
                         mMovieList.get(position).getImagePoster(),
-                        mMovieList.get(position).getSynopsis());
+                        mMovieList.get(position).getSynopsis(),
+                        mMovieList.get(position).getMovieId());
                 detailIntent.putExtra("movie", movie);
+                detailIntent.putExtra("url", mFullUrl);
                 startActivity(detailIntent);
             }
         });
@@ -114,13 +122,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             case R.id.action_sort_popular:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_POPULAR).apply();
-                mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY;
+                mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
                 mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
                 return true;
             case R.id.action_sort_top_rated:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_TOP_RATED).apply();
-                mFullUrl = MOVIE_QUERY_URL + TOP_RATED_PARAM + API_KEY;
+                mFullUrl = MOVIE_QUERY_URL + TOP_RATED_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
                 mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                return true;
+            case R.id.action_sort_favorites:
+                sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_FAVORITES).apply();
                 return true;
         }
 

@@ -33,7 +33,8 @@ public class MovieLoader extends android.support.v4.content.AsyncTaskLoader<List
         if(mURL == null) {
             return null;
         }
-        List<Movie> movies = QueryUtils.fetchMovieData(mURL);
+        List<Movie> movies;
+        movies = QueryUtils.fetchMovieData(mURL);
         return movies;
     }
 

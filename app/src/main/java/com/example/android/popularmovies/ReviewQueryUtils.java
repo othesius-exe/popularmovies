@@ -19,17 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utilities for Querying TMDB API.
+ *
  */
 
-public final class QueryUtils {
-
-    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+public class ReviewQueryUtils {
+    private static final String LOG_TAG = ReviewQueryUtils.class.getSimpleName();
 
     /**
      * Query the Movies API.
      */
-    public static List<Movie> fetchMovieData(String requestUrl) {
+    public static List<Review> fetchMovieData(String requestUrl) {
 
         // Create a Url Object.
         URL url = createUrl(requestUrl);
@@ -45,9 +44,9 @@ public final class QueryUtils {
         }
 
         // Extract relevant fields from json and create a new Movie object
-        List<Movie> movies = extractMovieFromJson(jsonResponse);
+        List<Review> reviews = extractReviewFromJson(jsonResponse);
 
-        return movies;
+        return reviews;
     }
 
     /**
@@ -132,7 +131,7 @@ public final class QueryUtils {
      * Build a Movie Object from the JSON response
      */
 
-    public static List<Movie> extractMovieFromJson(String movieJson) {
+    public static List<Review> extractReviewFromJson(String movieJson) {
         String title = "";
         int movieId = 0;
         Double rating = 0.0;
@@ -150,8 +149,7 @@ public final class QueryUtils {
             return null;
         }
 
-        // Create an ArrayList to store movies in
-        ArrayList<Movie> movieArrayList = new ArrayList<>();
+        // Create an ArrayList to store Reviews in
         ArrayList<Review> reviewsArrayList = new ArrayList<>();
 
         // Parse the JSON response using key:value pairs to get desired info
@@ -222,17 +220,13 @@ public final class QueryUtils {
                 }
                 Review review = new Review(author, content);
                 reviewsArrayList.add(review);
-                Movie movie = new Movie(title, rating, date, imgUrl,
-                        synopsis, movieId);
-                movieArrayList.add(movie);
-
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e(LOG_TAG, "Trouble parsing JSON.");
         }
-        return movieArrayList;
+        return reviewsArrayList;
 
     }
 }

@@ -13,6 +13,9 @@ public class Movie implements Parcelable {
     // Title:
     private String mTitle;
 
+    // Movie ID
+    private int mMovieId;
+
     // Rating:
     private Double mRating;
 
@@ -25,17 +28,24 @@ public class Movie implements Parcelable {
     // Movie Summary:
     private String mSynopsis;
 
-    public Movie(String title, Double rating, String releaseInfo, String image, String synopsis) {
+    private boolean isFavorite;
+
+    public Movie(String title, Double rating, String releaseInfo, String image, String synopsis, int id) {
         mTitle = title;
         mRating = rating;
         mReleaseInfo = releaseInfo;
         mImagePoster = image;
         mSynopsis = synopsis;
+        mMovieId = id;
     }
 
     // Getter methods for retrieving individual attributes
     public String getTitle() {
         return mTitle;
+    }
+
+    public int getMovieId() {
+        return mMovieId;
     }
 
     public Double getRating() {
@@ -54,6 +64,13 @@ public class Movie implements Parcelable {
         return mSynopsis;
     }
 
+    public boolean setAsFavorite() {
+        if (!isFavorite) {
+            isFavorite = true;
+        }
+        return isFavorite;
+    }
+
     // Override toString() to return a string of all included info
     @Override
     public String toString() {
@@ -66,6 +83,7 @@ public class Movie implements Parcelable {
 
     protected Movie(Parcel in) {
         mTitle = in.readString();
+        mMovieId = in.readInt();
         mRating = in.readByte() == 0x00 ? null : in.readDouble();
         mReleaseInfo = in.readString();
         mImagePoster = in.readString();
@@ -80,6 +98,7 @@ public class Movie implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mTitle);
+        dest.writeInt(mMovieId);
         if (mRating == null) {
             dest.writeByte((byte) (0x00));
         } else {

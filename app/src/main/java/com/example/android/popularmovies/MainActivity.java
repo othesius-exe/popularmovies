@@ -3,11 +3,14 @@ package com.example.android.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,10 +22,13 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 
+import com.example.android.popularmovies.data.UserFavoritesContract.FavoritesEntry;
+import com.example.android.popularmovies.data.UserFavoritesDbHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>> {
+public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -34,10 +40,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private String mFullUrl;
     private static final int MOVIE_LOADER_ID = 1;
+    private int FAVORITES_LOADER_ID = 2;
     private LoaderManager mLoaderManager;
 
     private ImageAdapter mImageAdapter;
     private ArrayList<Movie> mMovieList;
+    private ArrayList<Cursor> mCursorList;
+
+    private FavoritesAdapter mFavoritesAdapter;
+    private Cursor mFavoritesCursor;
 
     private GridView mGridView;
     private LinearLayout mEmptyView;
@@ -46,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int SORT_ORDER_POPULAR = 0;
     private static final int SORT_ORDER_TOP_RATED = 1;
     private static final int SORT_ORDER_FAVORITES = 2;
+
+    private UserFavoritesDbHelper mDbHelper;
 
     private int mMovieId = 0;
 
@@ -61,15 +74,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mGridView = (GridView) findViewById(R.id.grid_view);
         mImageAdapter = new ImageAdapter(this, new ArrayList<Movie>());
-        mGridView.setAdapter(mImageAdapter);
+
         mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
 
         mLoaderManager = getSupportLoaderManager();
-        mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+        mLoaderManager.initLoader(MOVIE_LOADER_ID, null, new MovieCallback());
+        mDbHelper = new UserFavoritesDbHelper(this);
 
         mMovieList = new ArrayList<>();
-
-
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -79,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
         if (isConnected) {
-            mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+            mLoaderManager.initLoader(MOVIE_LOADER_ID, null, new MovieCallback());
         } else {
             mEmptyView.setVisibility(View.VISIBLE);
             mGridView.setEmptyView(mEmptyView);
@@ -122,48 +134,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             case R.id.action_sort_popular:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_POPULAR).apply();
+                mMovieList.clear();
                 mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
-                mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, new MovieCallback());
                 return true;
             case R.id.action_sort_top_rated:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_TOP_RATED).apply();
+                mMovieList.clear();
                 mFullUrl = MOVIE_QUERY_URL + TOP_RATED_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
-                mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, new MovieCallback());
                 return true;
             case R.id.action_sort_favorites:
+                mMovieList.clear();
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_FAVORITES).apply();
+                mLoaderManager.initLoader(FAVORITES_LOADER_ID, null, new FavoritesCallback());
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        Log.i(LOG_TAG, "Creating Loader");
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Log.i(LOG_TAG, "Prefs " + sharedPreferences);
-
-        return new MovieLoader(this, mFullUrl);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
-        Log.i(LOG_TAG, "Load finished");
-        mMovieList.clear();
-        if (data != null && !data.isEmpty()) {
-            mEmptyView.setVisibility(View.GONE);
-            mMovieList.addAll(data);
-            mImageAdapter.addAll(mMovieList);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-        mMovieList.clear();
-        mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -175,5 +165,84 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mMovieList = savedInstanceState.getParcelableArrayList("movieList");
+    }
+
+    private class MovieCallback implements LoaderManager.LoaderCallbacks<List<Movie>> {
+
+        @Override
+        public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
+            Log.i(LOG_TAG, "Creating Loader");
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+            Log.i(LOG_TAG, "Prefs " + sharedPreferences);
+
+            return new MovieLoader(MainActivity.this, mFullUrl);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+            Log.i(LOG_TAG, "Load finished");
+            mMovieList.clear();
+            mGridView.setAdapter(mImageAdapter);
+            if (data != null && !data.isEmpty()) {
+                mEmptyView.setVisibility(View.GONE);
+                mMovieList.addAll(data);
+                mImageAdapter.addAll(mMovieList);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Movie>> loader) {
+            mMovieList.clear();
+            mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+        }
+
+    }
+
+    private class FavoritesCallback implements LoaderManager.LoaderCallbacks<Cursor> {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            String[] projection = {
+                    FavoritesEntry.COLUMN_MOVIE_ID,
+                    FavoritesEntry.COLUMN_TITLE,
+                    FavoritesEntry.COLUMN_RATING,
+                    FavoritesEntry.COLUMN_POSTER_PATH,
+                    FavoritesEntry.COLUMN_SUMMARY,
+                    FavoritesEntry.COLUMN_RELEASE_INFO};
+
+            return new CursorLoader(MainActivity.this, FavoritesEntry.CONTENT_URI,
+                    projection, null, null, null);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.v(LOG_TAG, "Data: " + data);
+            mMovieList.clear();
+            SQLiteDatabase db = mDbHelper.getReadableDatabase();
+            mFavoritesCursor = db.rawQuery("SELECT * FROM favorites", null);
+
+            while (mFavoritesCursor.moveToNext()) {
+
+                int titleColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_TITLE);
+                int idColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_MOVIE_ID);
+                int ratingColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_RATING);
+                int posterColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_POSTER_PATH);
+                int summaryColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_SUMMARY);
+                int releaseColumnIndex = mFavoritesCursor.getColumnIndex(FavoritesEntry.COLUMN_RELEASE_INFO);
+                Movie movie = new Movie(mFavoritesCursor.getString(titleColumnIndex),
+                        mFavoritesCursor.getDouble(ratingColumnIndex),
+                        mFavoritesCursor.getString(releaseColumnIndex),
+                        mFavoritesCursor.getString(posterColumnIndex),
+                        mFavoritesCursor.getString(summaryColumnIndex),
+                        mFavoritesCursor.getInt(idColumnIndex));
+                mMovieList.add(movie);
+            }
+            mImageAdapter.addAll(mMovieList);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mLoaderManager.initLoader(FAVORITES_LOADER_ID, null, this);
+        }
     }
 }

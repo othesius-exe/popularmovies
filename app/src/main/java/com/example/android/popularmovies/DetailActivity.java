@@ -1,9 +1,11 @@
 package com.example.android.popularmovies;
 
 import android.app.ActionBar;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -23,7 +25,10 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.popularmovies.data.UserFavoritesContract.FavoritesEntry;
+import com.example.android.popularmovies.data.UserFavoritesDbHelper;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -54,12 +59,13 @@ public class DetailActivity extends AppCompatActivity {
     private List<Trailer> mTrailerList;
     private ArrayList<Review> mReviewArrayList;
 
-    private Trailer mTrailer;
+    // Trailer Variables
     private String mTrailerId;
     private String mTrailerKey;
     private String mTrailerImagePath;
     private String mYoutubeTrailerPath;
 
+    // Views
     private ImageView mImageView;
     private TextView mTitleView;
     private TextView mRatingView;
@@ -69,9 +75,24 @@ public class DetailActivity extends AppCompatActivity {
     private ListView mReviewList;
     private ReviewAdapter mReviewAdapter;
 
+    // Loader Managers
     private LoaderManager mLoaderManager;
     private int REVIEW_LOADER = 1;
     private int TRAILER_LOADER = 2;
+
+    // Database Tools
+    private UserFavoritesDbHelper mDbHelper;
+
+    // Movie Variables
+    private String mTitle;
+    private int mMovieId;
+    private String mDate;
+    private String mPosterPath;
+    private Double mRating;
+    private String mSummary;
+
+    private ContentValues mValues;
+    private Uri mFavoriteUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +104,7 @@ public class DetailActivity extends AppCompatActivity {
         mTrailerList = new ArrayList<>();
         mReviewArrayList = new ArrayList<>();
         mReviewList = (ListView) findViewById(R.id.review_list);
+        mDbHelper = new UserFavoritesDbHelper(this);
 
         API_KEY = getResources().getString(R.string.apiKeys);
 
@@ -98,15 +120,15 @@ public class DetailActivity extends AppCompatActivity {
         Movie movie = intent.getParcelableExtra("movie");
         if (movie != null) {
 
-            String title = movie.getTitle();
-            int movieId = movie.getMovieId();
-            Double rating = movie.getRating();
-            String date = movie.getReleaseInfo();
-            String synopsis = movie.getSynopsis();
-            String image = movie.getImagePoster();
+            mTitle = movie.getTitle();
+            mMovieId = movie.getMovieId();
+            mRating = movie.getRating();
+            mDate = movie.getReleaseInfo();
+            mSummary = movie.getSynopsis();
+            mPosterPath = movie.getImagePoster();
 
-            mTrailerUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS;
-            mReviewUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_REVIEWS;
+            mTrailerUrl = MOVIE_QUERY_URL + mMovieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS;
+            mReviewUrl = MOVIE_QUERY_URL + mMovieId + QUESTION_KEY + API_KEY + APPEND_REVIEWS;
 
             // Start the review and trailer loaders
             if (isConnected) {
@@ -114,7 +136,7 @@ public class DetailActivity extends AppCompatActivity {
                 mLoaderManager.initLoader(REVIEW_LOADER, null, new ReviewCallback());
             }
 
-            String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + image;
+            String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + mPosterPath;
 
             mImageView = (ImageView) findViewById(R.id.detail_image_view);
             mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
@@ -145,17 +167,17 @@ public class DetailActivity extends AppCompatActivity {
             });
 
             mTitleView = (TextView) findViewById(R.id.detail_title_view);
-            mTitleView.setText(title);
+            mTitleView.setText(mTitle);
 
             mRatingView = (TextView) findViewById(R.id.detail_rating_view);
-            String stringRating = String.valueOf(rating);
+            String stringRating = String.valueOf(mRating);
             mRatingView.setText(stringRating);
 
             mDateView = (TextView) findViewById(R.id.detail_date_view);
-            mDateView.setText(date);
+            mDateView.setText(mDate);
 
             mSynopsisView = (TextView) findViewById(R.id.detail_synopsis_view);
-            mSynopsisView.setText(synopsis);
+            mSynopsisView.setText(mSummary);
         }
     }
 
@@ -169,33 +191,67 @@ public class DetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        Intent intent = getIntent();
-        Movie movie = intent.getParcelableExtra("movie");
-        if (movie != null) {
-            String title = movie.getTitle();
-            Double rating = movie.getRating();
-            String date = movie.getReleaseInfo();
-            String synopsis = movie.getSynopsis();
-            String image = movie.getImagePoster();
-
-            String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + image;
-        }
-
         switch (id) {
             case R.id.action_add_to_favorites:
-
+                addToFavorites();
+                break;
+            case R.id.action_remove_from_favorites:
+                removeFromFavorites();
         }
 
         return true;
     }
 
+    private void addToFavorites() {
+        // Get the database to write to
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Associate values with the correct table columns
+        mValues = new ContentValues();
+        mValues.put(FavoritesEntry.COLUMN_TITLE, mTitle);
+        mValues.put(FavoritesEntry.COLUMN_MOVIE_ID, mMovieId);
+        mValues.put(FavoritesEntry.COLUMN_POSTER_PATH, mPosterPath);
+        mValues.put(FavoritesEntry.COLUMN_RATING, mRating);
+        mValues.put(FavoritesEntry.COLUMN_RELEASE_INFO, mDate);
+        mValues.put(FavoritesEntry.COLUMN_SUMMARY, mSummary);
+
+        // Insert the values into the table
+        Long newFavoriteId = db.insertWithOnConflict(FavoritesEntry.TABLE_NAME, null,
+                mValues, SQLiteDatabase.CONFLICT_REPLACE);
+        Log.v(LOG_TAG, "New Row ID: " + newFavoriteId);
+
+        if (newFavoriteId == -1) {
+            Toast.makeText(this, "Movie not added to favorites.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Movie successfully added to favorites!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void removeFromFavorites() {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+
+        if (FavoritesEntry.CONTENT_URI != null) {
+            int rowsDeleted = db.delete(FavoritesEntry.TABLE_NAME, null , null);
+
+            if (rowsDeleted == 0) {
+                Toast.makeText(this, "Failed to remove item or item does not exist.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Movie removed from favorites!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Implementation for the Trailer Loader
+     */
     private class TrailerCallback implements LoaderManager.LoaderCallbacks<List<Trailer>> {
 
         @Override
         public Loader<List<Trailer>> onCreateLoader(int id, Bundle args) {
             return new TrailerLoader(DetailActivity.this, mTrailerUrl);
         }
-
+        // Get the first trailer from the Array
         @Override
         public void onLoadFinished(Loader<List<Trailer>> loader, List<Trailer> data) {
             Log.i(LOG_TAG, "Load finished." + data);
@@ -205,11 +261,12 @@ public class DetailActivity extends AppCompatActivity {
                 mTrailerKey = mTrailerList.get(0).getTrailerKey();
                 Log.i(LOG_TAG, "trailer id: " + mTrailerId);
                 Log.i(LOG_TAG, "trailer key: " + mTrailerKey);
-                mTrailer = new Trailer(mTrailerKey, mTrailerId);
 
                 mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
                 mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
 
+                // Inject the default image into the ImageView
+                // Set the LayoutParams on the ImageView
                 mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
                 mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(mTrailerImage);
@@ -225,13 +282,18 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Implementation for the ReviewLoader
+     */
     private class ReviewCallback implements LoaderManager.LoaderCallbacks<ArrayList<Review>> {
 
+        // Create the Loader with the url to fetch reviews
         @Override
         public Loader<ArrayList<Review>> onCreateLoader(int id, Bundle args) {
             return new ReviewLoader(DetailActivity.this, mReviewUrl);
         }
 
+        // Add the Reviews to the list and set the ReviewAdapter on the list
         @Override
         public void onLoadFinished(Loader<ArrayList<Review>> loader, ArrayList<Review> data) {
             Log.i(LOG_TAG, "Load finished." + data);
@@ -249,6 +311,7 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    // Sets the parameters for the ListView which holds the Review Objects
     public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {

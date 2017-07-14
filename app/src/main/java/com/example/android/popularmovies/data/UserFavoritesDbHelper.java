@@ -12,10 +12,10 @@ import com.example.android.popularmovies.data.UserFavoritesContract.FavoritesEnt
 
 public class UserFavoritesDbHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "tasks.db";
+    private static final String DATABASE_NAME = "favorites.db";
     private static final int VERSION = 1;
 
-    UserFavoritesDbHelper(Context context) {
+    public UserFavoritesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
 
@@ -23,8 +23,9 @@ public class UserFavoritesDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_FAVORITES_TABLE = "CREATE TABLE " + FavoritesEntry.TABLE_NAME + " ("
                 + FavoritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + FavoritesEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL UNIQUE, "
                 + FavoritesEntry.COLUMN_TITLE + " TEXT NOT NULL, "
-                + FavoritesEntry.COLUMN_RELEASE_INFO + " DATE NOT NULL, "
+                + FavoritesEntry.COLUMN_RELEASE_INFO + " STRING NOT NULL, "
                 + FavoritesEntry.COLUMN_RATING + " DOUBLE NOT NULL, "
                 + FavoritesEntry.COLUMN_SUMMARY + " STRING NOT NULL, "
                 + FavoritesEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL" + ");";

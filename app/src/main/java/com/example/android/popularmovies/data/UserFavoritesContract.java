@@ -24,6 +24,7 @@ public class UserFavoritesContract {
         public static final String TABLE_NAME = "favorites";
 
         public static final String COLUMN_TITLE = "title";
+        public static final String COLUMN_MOVIE_ID = "movieId";
         public static final String COLUMN_RELEASE_INFO = "date";
         public static final String COLUMN_POSTER_PATH = "poster";
         public static final String COLUMN_RATING = "rating";

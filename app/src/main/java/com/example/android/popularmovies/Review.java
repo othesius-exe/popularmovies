@@ -21,6 +21,20 @@ public class Review implements Parcelable {
         mContent = content;
     }
 
+    public String getAuthor() {
+        return mAuthor;
+    }
+
+    public String getContent() {
+        return mContent;
+    }
+
+    public String toString() {
+        return "Review by: " + mAuthor
+                + "\n"
+                + mContent;
+    }
+
     protected Review(Parcel in) {
         mAuthor = in.readString();
         mContent = in.readString();

@@ -7,6 +7,11 @@
     <string name="date">Released on: July 1, 2012</string>
     <string name="rating">3.7</string>
     <string name="synopsis">This will contain a summary of the movie that has been selected.</string>
+    <string name="review_author_sample">Blazorp</string>
+    <string name="review_sample">This is a 5 star TextView. Holds the content of the review just as it should</string>
+    <string name="trailer">Watch the Trailer</string>
+    <string name="reviews">Reviews</string>
+    <string name="no_reviews">There weren\'t any reviews to be found!</string>
 
     <string name="sort_preferences">Sort By</string>
     <string name="sort_key">Sort</string>
@@ -17,6 +22,7 @@
     <string name="favorites_preference">Favorites</string>
 
     <string name="menu_add_to_favorites">Add to Favorites</string>
+    <string name="menu_remove_from_favorites">Remove from Favorites</string>
 
     <string-array name="sort_options">
         <item name="popular">@string/popular_preference</item>

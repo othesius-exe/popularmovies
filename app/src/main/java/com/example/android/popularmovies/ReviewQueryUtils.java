@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -28,7 +27,7 @@ public class ReviewQueryUtils {
     /**
      * Query the Movies API.
      */
-    public static List<Review> fetchMovieData(String requestUrl) {
+    public static ArrayList<Review> fetchReviewData(String requestUrl) {
 
         // Create a Url Object.
         URL url = createUrl(requestUrl);
@@ -44,7 +43,7 @@ public class ReviewQueryUtils {
         }
 
         // Extract relevant fields from json and create a new Movie object
-        List<Review> reviews = extractReviewFromJson(jsonResponse);
+        ArrayList<Review> reviews = extractReviewFromJson(jsonResponse);
 
         return reviews;
     }
@@ -131,16 +130,7 @@ public class ReviewQueryUtils {
      * Build a Movie Object from the JSON response
      */
 
-    public static List<Review> extractReviewFromJson(String movieJson) {
-        String title = "";
-        int movieId = 0;
-        Double rating = 0.0;
-        String date = "";
-        String imgUrl = "";
-        String synopsis = "";
-        String trailerKey = "";
-        String trailerId = "";
-
+    public static ArrayList<Review> extractReviewFromJson(String movieJson) {
         String author = "";
         String content = "";
 
@@ -155,60 +145,13 @@ public class ReviewQueryUtils {
         // Parse the JSON response using key:value pairs to get desired info
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
-            JSONArray movieJsonArray = baseJsonResponse.getJSONArray("results");
-
-
-            for (int i = 0; i < movieJsonArray.length(); i ++) {
-                JSONObject thisMovie = movieJsonArray.getJSONObject(i);
-                // Retrieve the poster url
-                if (thisMovie.has("poster_path")) {
-                    imgUrl = thisMovie.getString("poster_path");
-                }
-                // Retrieve the title
-                if (thisMovie.has("title")) {
-                    title = thisMovie.getString("title");
-                }
-                // Retrieve the id of the movie
-                if (thisMovie.has("id")) {
-                    movieId = thisMovie.getInt("id");
-                }
-                // Retrieve the rating
-                if (thisMovie.has("vote_average")) {
-                    rating = thisMovie.getDouble("vote_average");
-                }
-                // Retrieve the release date
-                if (thisMovie.has("release_date")) {
-                    date = thisMovie.getString("release_date");
-                }
-                if (thisMovie.has("overview")) {
-                    synopsis = thisMovie.getString("overview");
-                }
-                // Check for videos
-                if (thisMovie.has("videos")) {
-                    // Get the videos Object
-                    JSONObject videosObject = thisMovie.getJSONObject("videos");
-                    // Iterate over the videos array
-                    if (videosObject.has("results")) {
-                        JSONArray videosArray = videosObject.getJSONArray("results");
-                        JSONObject thisVideo = videosArray.getJSONObject(0);
-                        if (thisVideo.has("key")) {
-                            trailerKey = thisVideo.getString("key");
-                        }
-                        if (thisVideo.has("id")) {
-                            trailerId = thisVideo.getString("id");
-                        }
-                    }
-
-                }
                 // Check for reviews
-                if (thisMovie.has("reviews")) {
-                    // Get the reviews object
-                    JSONObject reviewObject = thisMovie.getJSONObject("reviews");
-                    // Get the reviews
+                if (baseJsonResponse.has("reviews")) {
+                    JSONObject reviewObject = baseJsonResponse.getJSONObject("reviews");
                     if (reviewObject.has("results")) {
                         JSONArray reviewArray = reviewObject.getJSONArray("results");
-                        for (int x = 0; x < 5; x ++) {
-                            JSONObject thisReview = reviewArray.getJSONObject(x);
+                        for (int r = 0; r < reviewArray.length(); r++) {
+                            JSONObject thisReview = reviewArray.getJSONObject(r);
                             if (thisReview.has("author")) {
                                 author = thisReview.getString("author");
                             }
@@ -220,7 +163,6 @@ public class ReviewQueryUtils {
                 }
                 Review review = new Review(author, content);
                 reviewsArrayList.add(review);
-            }
 
         } catch (JSONException e) {
             e.printStackTrace();

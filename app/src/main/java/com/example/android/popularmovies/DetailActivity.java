@@ -1,9 +1,12 @@
 package com.example.android.popularmovies;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -12,9 +15,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -45,11 +52,13 @@ public class DetailActivity extends AppCompatActivity {
     private String QUESTION_KEY = "?";
 
     private List<Trailer> mTrailerList;
-    private List<Review> mReviewList;
+    private ArrayList<Review> mReviewArrayList;
 
     private Trailer mTrailer;
     private String mTrailerId;
     private String mTrailerKey;
+    private String mTrailerImagePath;
+    private String mYoutubeTrailerPath;
 
     private ImageView mImageView;
     private TextView mTitleView;
@@ -57,6 +66,8 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mDateView;
     private TextView mSynopsisView;
     private ImageView mTrailerImage;
+    private ListView mReviewList;
+    private ReviewAdapter mReviewAdapter;
 
     private LoaderManager mLoaderManager;
     private int REVIEW_LOADER = 1;
@@ -70,6 +81,8 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         mLoaderManager = getSupportLoaderManager();
         mTrailerList = new ArrayList<>();
+        mReviewArrayList = new ArrayList<>();
+        mReviewList = (ListView) findViewById(R.id.review_list);
 
         API_KEY = getResources().getString(R.string.apiKeys);
 
@@ -94,9 +107,11 @@ public class DetailActivity extends AppCompatActivity {
 
             mTrailerUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS;
             mReviewUrl = MOVIE_QUERY_URL + movieId + QUESTION_KEY + API_KEY + APPEND_REVIEWS;
+
             // Start the review and trailer loaders
             if (isConnected) {
                 mLoaderManager.initLoader(TRAILER_LOADER, null, new TrailerCallback());
+                mLoaderManager.initLoader(REVIEW_LOADER, null, new ReviewCallback());
             }
 
             String fullImagePath = BASE_IMAGE_URL + IMAGE_WIDTH + image;
@@ -105,6 +120,29 @@ public class DetailActivity extends AppCompatActivity {
             mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
             mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             Picasso.with(this).load(fullImagePath).into(mImageView);
+
+            mTrailerImage = (ImageView) findViewById(R.id.trailer_image_view);
+            mTrailerImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri trailerLink = Uri.parse(mYoutubeTrailerPath);
+                    Intent trailerIntent = new Intent(Intent.ACTION_VIEW, trailerLink);
+                    PackageManager packageManager = getPackageManager();
+                    List activities = packageManager.queryIntentActivities(trailerIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                    boolean isIntentSafe = activities.size() > 0;
+                    if (isIntentSafe) {
+                        startActivity((trailerIntent));
+                    }
+                }
+            });
+
+            mReviewList.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                    return false;
+                }
+            });
 
             mTitleView = (TextView) findViewById(R.id.detail_title_view);
             mTitleView.setText(title);
@@ -169,15 +207,15 @@ public class DetailActivity extends AppCompatActivity {
                 Log.i(LOG_TAG, "trailer key: " + mTrailerKey);
                 mTrailer = new Trailer(mTrailerKey, mTrailerId);
 
-                String trailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerId + DEFAULT_KEY;
-                String youtubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
+                mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
+                mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
 
-                mTrailerImage = (ImageView) findViewById(R.id.trailer_image_view);
-                mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
+                mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
                 mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                Picasso.with(DetailActivity.this).load(trailerImagePath).into(mTrailerImage);
-                Log.i(LOG_TAG, "Trailer Image path: " + trailerImagePath);
-                Log.i(LOG_TAG, "Trailer Path: " + youtubeTrailerPath);
+                Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(mTrailerImage);
+                Log.i(LOG_TAG, "Trailer Image path: " + mTrailerImagePath);
+                Log.i(LOG_TAG, "Trailer Path: " + mYoutubeTrailerPath);
+
             }
         }
 
@@ -185,5 +223,51 @@ public class DetailActivity extends AppCompatActivity {
         public void onLoaderReset(Loader<List<Trailer>> loader) {
             mLoaderManager.restartLoader(TRAILER_LOADER, null, this);
         }
+    }
+
+    private class ReviewCallback implements LoaderManager.LoaderCallbacks<ArrayList<Review>> {
+
+        @Override
+        public Loader<ArrayList<Review>> onCreateLoader(int id, Bundle args) {
+            return new ReviewLoader(DetailActivity.this, mReviewUrl);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<ArrayList<Review>> loader, ArrayList<Review> data) {
+            Log.i(LOG_TAG, "Load finished." + data);
+            if (data != null && !data.isEmpty()) {
+                mReviewArrayList.addAll(data);
+                mReviewAdapter = new ReviewAdapter(DetailActivity.this, mReviewArrayList);
+                mReviewList.setAdapter(mReviewAdapter);
+                setListViewHeightBasedOnChildren(mReviewList);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<ArrayList<Review>> loader) {
+
+        }
+    }
+
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        int totalHeight = 0;
+        View view = null;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            view = listAdapter.getView(i, view, listView);
+            if (i == 0) {
+                view.setLayoutParams(new ViewGroup.LayoutParams((desiredWidth), ActionBar.LayoutParams.WRAP_CONTENT));
+            }
+            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += view.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() -1));
+        listView.setLayoutParams(params);
     }
 }

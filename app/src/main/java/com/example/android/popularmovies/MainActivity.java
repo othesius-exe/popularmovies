@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.example.android.popularmovies.data.UserFavoritesContract.FavoritesEntry;
 import com.example.android.popularmovies.data.UserFavoritesDbHelper;
@@ -45,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageAdapter mImageAdapter;
     private ArrayList<Movie> mMovieList;
-    private ArrayList<Cursor> mCursorList;
 
-    private FavoritesAdapter mFavoritesAdapter;
     private Cursor mFavoritesCursor;
 
     private GridView mGridView;
@@ -62,12 +61,16 @@ public class MainActivity extends AppCompatActivity {
 
     private int mMovieId = 0;
 
+    private ProgressBar mProgressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress);
+        mProgressBar.setVisibility(View.VISIBLE);
 
         API_KEY = getResources().getString(R.string.apiKeys);
         mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         mImageAdapter = new ImageAdapter(this, new ArrayList<Movie>());
 
         mEmptyView = (LinearLayout) findViewById(R.id.empty_view);
+        mEmptyView.setVisibility(View.INVISIBLE);
 
         mLoaderManager = getSupportLoaderManager();
         mLoaderManager.initLoader(MOVIE_LOADER_ID, null, new MovieCallback());
@@ -172,10 +176,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
             Log.i(LOG_TAG, "Creating Loader");
-
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             Log.i(LOG_TAG, "Prefs " + sharedPreferences);
-
+            mProgressBar.setVisibility(View.VISIBLE);
             return new MovieLoader(MainActivity.this, mFullUrl);
         }
 
@@ -185,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
             mMovieList.clear();
             mGridView.setAdapter(mImageAdapter);
             if (data != null && !data.isEmpty()) {
+                mProgressBar.setVisibility(View.GONE);
                 mEmptyView.setVisibility(View.GONE);
                 mMovieList.addAll(data);
                 mImageAdapter.addAll(mMovieList);
@@ -196,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
             mMovieList.clear();
             mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
         }
-
     }
 
     private class FavoritesCallback implements LoaderManager.LoaderCallbacks<Cursor> {

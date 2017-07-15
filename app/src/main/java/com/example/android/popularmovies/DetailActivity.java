@@ -250,14 +250,12 @@ public class DetailActivity extends AppCompatActivity {
                     LinearLayout trailerList = (LinearLayout) findViewById(R.id.trailer_list_view);
                     mTrailerId = t.getTrailerId();
                     mTrailerKey = t.getTrailerKey();
-                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerId + DEFAULT_KEY;
+                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
                     mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
                     View v = inflater.inflate(R.layout.trailer_item, null);
                     TextView titleView = (TextView) v.findViewById(R.id.trailer_title_view);
                     titleView.setText(t.getTrailerTitle());
                     ImageView trailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
-                    trailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
-                    trailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(trailerImage);
                     trailerList.addView(v);
 
@@ -274,7 +272,6 @@ public class DetailActivity extends AppCompatActivity {
                         }
                     });
                 }
-
             }
         }
 

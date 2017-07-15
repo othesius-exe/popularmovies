@@ -185,47 +185,11 @@ public final class QueryUtils {
                 if (thisMovie.has("overview")) {
                     synopsis = thisMovie.getString("overview");
                 }
-                // Check for videos
-                if (thisMovie.has("videos")) {
-                    // Get the videos Object
-                    JSONObject videosObject = thisMovie.getJSONObject("videos");
-                    // Iterate over the videos array
-                    if (videosObject.has("results")) {
-                        JSONArray videosArray = videosObject.getJSONArray("results");
-                        JSONObject thisVideo = videosArray.getJSONObject(0);
-                        if (thisVideo.has("key")) {
-                            trailerKey = thisVideo.getString("key");
-                        }
-                        if (thisVideo.has("id")) {
-                            trailerId = thisVideo.getString("id");
-                        }
-                    }
-
-                }
-                // Check for reviews
-                if (thisMovie.has("reviews")) {
-                    // Get the reviews object
-                    JSONObject reviewObject = thisMovie.getJSONObject("reviews");
-                    // Get the reviews
-                    if (reviewObject.has("results")) {
-                        JSONArray reviewArray = reviewObject.getJSONArray("results");
-                        for (int x = 0; x < 5; x ++) {
-                            JSONObject thisReview = reviewArray.getJSONObject(x);
-                            if (thisReview.has("author")) {
-                                author = thisReview.getString("author");
-                            }
-                            if (thisReview.has("content")) {
-                                content = thisReview.getString("content");
-                            }
-                        }
-                    }
-                }
                 Review review = new Review(author, content);
                 reviewsArrayList.add(review);
                 Movie movie = new Movie(title, rating, date, imgUrl,
                         synopsis, movieId);
                 movieArrayList.add(movie);
-
             }
 
         } catch (JSONException e) {

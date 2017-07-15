@@ -158,9 +158,9 @@ public class TrailerQueryUtils {
                     if (thisVideo.has("name")) {
                         trailerTitle = thisVideo.getString("name");
                     }
+                    Trailer trailer = new Trailer(trailerKey, trailerId, trailerTitle);
+                    trailerArrayList.add(trailer);
                 }
-                Trailer trailer = new Trailer(trailerKey, trailerId, trailerTitle);
-                trailerArrayList.add(trailer);
             }
 
         } catch (JSONException e) {
@@ -168,6 +168,5 @@ public class TrailerQueryUtils {
             Log.e(LOG_TAG, "Trouble parsing JSON.");
         }
         return trailerArrayList;
-
     }
 }

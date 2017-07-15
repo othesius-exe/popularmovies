@@ -166,6 +166,5 @@ public class ReviewQueryUtils {
             Log.e(LOG_TAG, "Trouble parsing JSON.");
         }
         return reviewsArrayList;
-
     }
 }

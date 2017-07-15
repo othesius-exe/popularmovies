@@ -77,6 +77,7 @@ public class DetailActivity extends AppCompatActivity {
     private ListView mTrailerListView;
     private ReviewAdapter mReviewAdapter;
     private TrailerAdapter mTrailerAdapter;
+    private LinearLayout mTrailerLayout;
 
     // Loader Managers
     private LoaderManager mLoaderManager;
@@ -242,12 +243,15 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public void onLoadFinished(Loader<ArrayList<Trailer>> loader, ArrayList<Trailer> data) {
             Log.i(LOG_TAG, "Load finished." + data);
+            if (mTrailerLayout != null && mTrailerLayout.getChildCount() > 0) {
+                mTrailerLayout.removeAllViews();
+            }
             if (data != null && !data.isEmpty()) {
                 mTrailerList.addAll(data);
                 Log.v(LOG_TAG, "Trailers in list: " + mTrailerList.toString());
                 LayoutInflater inflater = (LayoutInflater) DetailActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 for (Trailer t : mTrailerList) {
-                    LinearLayout trailerList = (LinearLayout) findViewById(R.id.trailer_list_view);
+                    mTrailerLayout = (LinearLayout) findViewById(R.id.trailer_list_view);
                     mTrailerId = t.getTrailerId();
                     mTrailerKey = t.getTrailerKey();
                     mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
@@ -255,11 +259,10 @@ public class DetailActivity extends AppCompatActivity {
                     View v = inflater.inflate(R.layout.trailer_item, null);
                     TextView titleView = (TextView) v.findViewById(R.id.trailer_title_view);
                     titleView.setText(t.getTrailerTitle());
-                    ImageView trailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
-                    Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(trailerImage);
-                    trailerList.addView(v);
+                    mTrailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
+                    Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(mTrailerImage);
 
-                    trailerImage.setOnClickListener(new View.OnClickListener() {
+                    mTrailerImage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Uri trailerLink = Uri.parse(mYoutubeTrailerPath);
@@ -271,6 +274,7 @@ public class DetailActivity extends AppCompatActivity {
                             }
                         }
                     });
+                    mTrailerLayout.addView(v);
                 }
             }
         }

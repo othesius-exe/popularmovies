@@ -58,10 +58,11 @@
     </style>
 
     <style name="trailer_title_style">
-        <item name="android:gravity">center|left</item>
+        <item name="android:gravity">center</item>
         <item name="android:textSize">@dimen/review_author_text_size</item>
         <item name="android:paddingLeft">@dimen/review_text_padding_start</item>
         <item name="android:typeface">monospace</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primaryText</item>
     </style>
 </resources>

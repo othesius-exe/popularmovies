@@ -146,18 +146,15 @@ public class ReviewQueryUtils {
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
                 // Check for reviews
-                if (baseJsonResponse.has("reviews")) {
-                    JSONObject reviewObject = baseJsonResponse.getJSONObject("reviews");
-                    if (reviewObject.has("results")) {
-                        JSONArray reviewArray = reviewObject.getJSONArray("results");
-                        for (int r = 0; r < reviewArray.length(); r++) {
-                            JSONObject thisReview = reviewArray.getJSONObject(r);
-                            if (thisReview.has("author")) {
-                                author = thisReview.getString("author");
-                            }
-                            if (thisReview.has("content")) {
-                                content = thisReview.getString("content");
-                            }
+                if (baseJsonResponse.has("results")) {
+                    JSONArray reviewArray = baseJsonResponse.getJSONArray("results");
+                    for (int r = 0; r < reviewArray.length(); r++) {
+                        JSONObject thisReview = reviewArray.getJSONObject(r);
+                        if (thisReview.has("author")) {
+                            author = thisReview.getString("author");
+                        }
+                        if (thisReview.has("content")) {
+                            content = thisReview.getString("content");
                         }
                     }
                 }

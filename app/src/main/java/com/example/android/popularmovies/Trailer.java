@@ -15,9 +15,13 @@ public class Trailer implements Parcelable {
     // Video ID
     private String mTrailerId;
 
-    public Trailer(String key, String id) {
+    // Title
+    private String mTitle;
+
+    public Trailer(String key, String id, String title) {
         mTrailerKey = key;
         mTrailerId = id;
+        mTitle = title;
     }
 
     public String getTrailerKey(){
@@ -28,15 +32,21 @@ public class Trailer implements Parcelable {
         return mTrailerId;
     }
 
+    public String getTrailerTitle() {
+        return mTitle;
+    }
+
     public String toString() {
         return "Trailer key: " + mTrailerKey
                 + " "
-                + "Trailer ID: " + mTrailerId;
+                + "Trailer ID: " + mTrailerId
+                + "Trailer title: " + mTitle;
     }
 
     protected Trailer(Parcel in) {
         mTrailerKey = in.readString();
         mTrailerId = in.readString();
+        mTitle = in.readString();
     }
 
     @Override
@@ -48,6 +58,7 @@ public class Trailer implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mTrailerKey);
         dest.writeString(mTrailerId);
+        dest.writeString(mTitle);
     }
 
     @SuppressWarnings("unused")

@@ -15,6 +15,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -44,8 +45,8 @@ public class DetailActivity extends AppCompatActivity {
 
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "";
-    private String APPEND_VIDEOS = "&append_to_response=videos";
-    private String APPEND_REVIEWS = "&append_to_response=reviews";
+    private String APPEND_VIDEOS = "/videos";
+    private String APPEND_REVIEWS = "/reviews";
     private String mTrailerUrl = "";
     private String mReviewUrl = "";
 
@@ -54,9 +55,9 @@ public class DetailActivity extends AppCompatActivity {
     private String YOUTUBE_PATH = "https://www.youtube.com/watch?v=";
     private String DEFAULT_TRAILER_IMAGE = "https://img.youtube.com/vi/";
     private String DEFAULT_KEY = "/default.jpg";
-    private String QUESTION_KEY = "?";
+    private String API_PARAM = "?api_key=";
 
-    private List<Trailer> mTrailerList;
+    private ArrayList<Trailer> mTrailerList;
     private ArrayList<Review> mReviewArrayList;
 
     // Trailer Variables
@@ -73,7 +74,9 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mSynopsisView;
     private ImageView mTrailerImage;
     private ListView mReviewList;
+    private ListView mTrailerListView;
     private ReviewAdapter mReviewAdapter;
+    private TrailerAdapter mTrailerAdapter;
 
     // Loader Managers
     private LoaderManager mLoaderManager;
@@ -92,7 +95,6 @@ public class DetailActivity extends AppCompatActivity {
     private String mSummary;
 
     private ContentValues mValues;
-    private Uri mFavoriteUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,8 +129,8 @@ public class DetailActivity extends AppCompatActivity {
             mSummary = movie.getSynopsis();
             mPosterPath = movie.getImagePoster();
 
-            mTrailerUrl = MOVIE_QUERY_URL + mMovieId + QUESTION_KEY + API_KEY + APPEND_VIDEOS;
-            mReviewUrl = MOVIE_QUERY_URL + mMovieId + QUESTION_KEY + API_KEY + APPEND_REVIEWS;
+            mTrailerUrl = MOVIE_QUERY_URL + mMovieId + APPEND_VIDEOS + API_PARAM + API_KEY;
+            mReviewUrl = MOVIE_QUERY_URL + mMovieId + APPEND_REVIEWS + API_PARAM + API_KEY;
 
             // Start the review and trailer loaders
             if (isConnected) {
@@ -142,21 +144,6 @@ public class DetailActivity extends AppCompatActivity {
             mImageView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 900));
             mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             Picasso.with(this).load(fullImagePath).into(mImageView);
-
-            mTrailerImage = (ImageView) findViewById(R.id.trailer_image_view);
-            mTrailerImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Uri trailerLink = Uri.parse(mYoutubeTrailerPath);
-                    Intent trailerIntent = new Intent(Intent.ACTION_VIEW, trailerLink);
-                    PackageManager packageManager = getPackageManager();
-                    List activities = packageManager.queryIntentActivities(trailerIntent, PackageManager.MATCH_DEFAULT_ONLY);
-                    boolean isIntentSafe = activities.size() > 0;
-                    if (isIntentSafe) {
-                        startActivity((trailerIntent));
-                    }
-                }
-            });
 
             mReviewList.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -245,44 +232,56 @@ public class DetailActivity extends AppCompatActivity {
     /**
      * Implementation for the Trailer Loader
      */
-    private class TrailerCallback implements LoaderManager.LoaderCallbacks<List<Trailer>> {
+    private class TrailerCallback implements LoaderManager.LoaderCallbacks<ArrayList<Trailer>> {
 
         @Override
-        public Loader<List<Trailer>> onCreateLoader(int id, Bundle args) {
+        public Loader<ArrayList<Trailer>> onCreateLoader(int id, Bundle args) {
             return new TrailerLoader(DetailActivity.this, mTrailerUrl);
         }
-        // Get the first trailer from the Array
+
         @Override
-        public void onLoadFinished(Loader<List<Trailer>> loader, List<Trailer> data) {
+        public void onLoadFinished(Loader<ArrayList<Trailer>> loader, ArrayList<Trailer> data) {
             Log.i(LOG_TAG, "Load finished." + data);
             if (data != null && !data.isEmpty()) {
                 mTrailerList.addAll(data);
-                mTrailerId = mTrailerList.get(0).getTrailerId();
-                mTrailerKey = mTrailerList.get(0).getTrailerKey();
-                Log.i(LOG_TAG, "trailer id: " + mTrailerId);
-                Log.i(LOG_TAG, "trailer key: " + mTrailerKey);
+                LayoutInflater inflater = (LayoutInflater) DetailActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                for (Trailer t : mTrailerList) {
+                    LinearLayout trailerList = (LinearLayout) findViewById(R.id.trailer_list_view);
+                    mTrailerId = t.getTrailerId();
+                    mTrailerKey = t.getTrailerKey();
+                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
+                    mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
+                    View v = inflater.inflate(R.layout.trailer_item, null);
+                    TextView titleView = (TextView) v.findViewById(R.id.trailer_title_view);
+                    titleView.setText(t.getTrailerTitle());
+                    ImageView trailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
+                    Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(trailerImage);
+                    trailerList.addView(v);
 
-                mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
-                mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
-
-                // Inject the default image into the ImageView
-                // Set the LayoutParams on the ImageView
-                mTrailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
-                mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(mTrailerImage);
-                Log.i(LOG_TAG, "Trailer Image path: " + mTrailerImagePath);
-                Log.i(LOG_TAG, "Trailer Path: " + mYoutubeTrailerPath);
+                    trailerImage.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Uri trailerLink = Uri.parse(mYoutubeTrailerPath);
+                            Intent trailerIntent = new Intent(Intent.ACTION_VIEW, trailerLink);
+                            List activities = getPackageManager().queryIntentActivities(trailerIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                            boolean isIntentSafe = activities.size() > 0;
+                            if (isIntentSafe) {
+                                startActivity((trailerIntent));
+                            }
+                        }
+                    });
+                }
 
             }
         }
 
         @Override
-        public void onLoaderReset(Loader<List<Trailer>> loader) {
-            mLoaderManager.restartLoader(TRAILER_LOADER, null, this);
+        public void onLoaderReset(Loader<ArrayList<Trailer>> loader) {
+
         }
     }
 
-    /**
+        /**
      * Implementation for the ReviewLoader
      */
     private class ReviewCallback implements LoaderManager.LoaderCallbacks<ArrayList<Review>> {

@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -28,7 +27,7 @@ public class TrailerQueryUtils {
     /**
      * Query the Movies API.
      */
-    public static List<Trailer> fetchTrailerData(String requestUrl) {
+    public static ArrayList<Trailer> fetchTrailerData(String requestUrl) {
 
         // Create a Url Object.
         URL url = createUrl(requestUrl);
@@ -44,7 +43,7 @@ public class TrailerQueryUtils {
         }
 
         // Extract relevant fields from json and create a new Movie object
-        List<Trailer> trailers = extractTrailersFromJson(jsonResponse);
+        ArrayList<Trailer> trailers = extractTrailersFromJson(jsonResponse);
 
         return trailers;
     }
@@ -131,15 +130,15 @@ public class TrailerQueryUtils {
      * Build a Movie Object from the JSON response
      */
 
-    public static List<Trailer> extractTrailersFromJson(String movieJson) {
+    public static ArrayList<Trailer> extractTrailersFromJson(String movieJson) {
         String trailerKey = "";
         String trailerId = "";
+        String trailerTitle = "";
 
         // Make Sure the JSON isn't empty
         if (TextUtils.isEmpty(movieJson)) {
             return null;
         }
-
         // Create an ArrayList to store trailers in
         ArrayList<Trailer> trailerArrayList = new ArrayList<>();
 
@@ -147,22 +146,22 @@ public class TrailerQueryUtils {
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
             for (int i = 0; i < baseJsonResponse.length(); i ++) {
-                if (baseJsonResponse.has("videos")) {
-                    JSONObject trailerObject = baseJsonResponse.getJSONObject("videos");
-                    if (trailerObject.has("results")) {
-                        JSONArray trailerArray = trailerObject.getJSONArray("results");
-                        for (int v = 0; v < trailerArray.length(); v++) {
-                            JSONObject thisVideo = trailerArray.getJSONObject(v);
-                            if (thisVideo.has("key")) {
-                                trailerKey = thisVideo.getString("key");
-                            }
-                            if (thisVideo.has("id")) {
-                                trailerId = thisVideo.getString("id");
-                            }
+                if (baseJsonResponse.has("results")) {
+                    JSONArray videoArray = baseJsonResponse.getJSONArray("results");
+                    for (int v = 0; v < videoArray.length(); v++) {
+                        JSONObject thisVideo = videoArray.getJSONObject(v);
+                        if (thisVideo.has("id")) {
+                            trailerId = thisVideo.getString("id");
+                        }
+                        if (thisVideo.has("key")) {
+                            trailerKey = thisVideo.getString("key");
+                        }
+                        if (thisVideo.has("name")) {
+                            trailerTitle = thisVideo.getString("name");
                         }
                     }
                 }
-                Trailer trailer = new Trailer(trailerKey, trailerId);
+                Trailer trailer = new Trailer(trailerKey, trailerId, trailerTitle);
                 trailerArrayList.add(trailer);
             }
 

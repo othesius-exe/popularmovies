@@ -4,13 +4,13 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  *
  */
 
-public class TrailerLoader extends AsyncTaskLoader<List<Trailer>> {
+public class TrailerLoader extends AsyncTaskLoader<ArrayList<Trailer>> {
 
     private String LOG_TAG = TrailerLoader.class.getSimpleName();
 
@@ -29,11 +29,11 @@ public class TrailerLoader extends AsyncTaskLoader<List<Trailer>> {
     }
 
     @Override
-    public List<Trailer> loadInBackground() {
+    public ArrayList<Trailer> loadInBackground() {
         if (mUrl == null) {
             return null;
         }
-        List<Trailer> trailers;
+        ArrayList<Trailer> trailers;
         trailers = TrailerQueryUtils.fetchTrailerData(mUrl);
         return trailers;
     }

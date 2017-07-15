@@ -20,9 +20,9 @@
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         android:isScrollContainer="true"
-        android:paddingBottom="20dp"
-        android:clipToPadding="false">
+        android:paddingBottom="@dimen/scrollview_bottom_padding">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
@@ -65,55 +65,52 @@
                 style="@style/synopsis_style"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="20dp"
+                android:paddingBottom="@dimen/scrollview_bottom_padding"
                 android:text="@string/synopsis" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/colorAccent"/>
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/colorAccent" />
 
             <TextView
                 style="@style/review_header_style"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/detail_text_height"
-                android:text="@string/trailer"/>
+                android:text="@string/trailer" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/colorAccent"/>
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/colorAccent" />
 
-            <ImageView
-                android:id="@+id/trailer_image_view"
+            <LinearLayout
+                android:orientation="vertical"
+                android:id="@+id/trailer_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/trailer_image_height"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/tmdb" />
+                android:layout_height="wrap_content" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/colorAccent"/>
-            
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/colorAccent" />
+
             <TextView
                 style="@style/review_header_style"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/detail_text_height"
-                android:text="@string/reviews"/>
+                android:text="@string/reviews" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@color/colorAccent"/>
+                android:layout_height="@dimen/divider_height"
+                android:background="@color/colorAccent" />
 
             <ListView
                 android:id="@+id/review_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clipToPadding="false"/>
+                android:clipToPadding="false" />
 
         </LinearLayout>
 

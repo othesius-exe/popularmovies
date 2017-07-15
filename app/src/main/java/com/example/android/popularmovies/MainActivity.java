@@ -36,8 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private String MOVIE_QUERY_URL = "https://api.themoviedb.org/3/movie/";
     private String API_KEY = "";
     private String APPEND_VIDEOS_AND_REVIEWS = "&append_to_response=videos,reviews";
-    private String POPULAR_PARAM = "popular?";
-    private String TOP_RATED_PARAM = "top_rated?";
+    private String POPULAR_PARAM = "popular";
+    private String TOP_RATED_PARAM = "top_rated";
+    private String API_PARAM = "?api_key=";
 
     private String mFullUrl;
     private static final int MOVIE_LOADER_ID = 1;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         mProgressBar.setVisibility(View.VISIBLE);
 
         API_KEY = getResources().getString(R.string.apiKeys);
-        mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
+        mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_PARAM + API_KEY;
 
         mGridView = (GridView) findViewById(R.id.grid_view);
         mImageAdapter = new ImageAdapter(this, new ArrayList<Movie>());
@@ -139,13 +140,13 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_sort_popular:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_POPULAR).apply();
                 mMovieList.clear();
-                mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
+                mFullUrl = MOVIE_QUERY_URL + POPULAR_PARAM + API_PARAM + API_KEY;
                 mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, new MovieCallback());
                 return true;
             case R.id.action_sort_top_rated:
                 sharedPreferences.edit().putInt(SORT_ORDER, SORT_ORDER_TOP_RATED).apply();
                 mMovieList.clear();
-                mFullUrl = MOVIE_QUERY_URL + TOP_RATED_PARAM + API_KEY + APPEND_VIDEOS_AND_REVIEWS;
+                mFullUrl = MOVIE_QUERY_URL + TOP_RATED_PARAM + API_PARAM + API_KEY;
                 mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, new MovieCallback());
                 return true;
             case R.id.action_sort_favorites:

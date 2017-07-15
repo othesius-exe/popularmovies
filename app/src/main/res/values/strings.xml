@@ -12,6 +12,8 @@
     <string name="trailer">Watch the Trailer</string>
     <string name="reviews">Reviews</string>
     <string name="no_reviews">There weren\'t any reviews to be found!</string>
+    <string name="trailer_title">Title Goes Here</string>
+    <string name="no_trailers">We didn\'t find any trailers!</string>
 
     <string name="sort_preferences">Sort By</string>
     <string name="sort_key">Sort</string>

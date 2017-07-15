@@ -145,20 +145,18 @@ public class TrailerQueryUtils {
         // Parse the JSON response using key:value pairs to get desired info
         try {
             JSONObject baseJsonResponse = new JSONObject(movieJson);
-            for (int i = 0; i < baseJsonResponse.length(); i ++) {
-                if (baseJsonResponse.has("results")) {
-                    JSONArray videoArray = baseJsonResponse.getJSONArray("results");
-                    for (int v = 0; v < videoArray.length(); v++) {
-                        JSONObject thisVideo = videoArray.getJSONObject(v);
-                        if (thisVideo.has("id")) {
-                            trailerId = thisVideo.getString("id");
-                        }
-                        if (thisVideo.has("key")) {
-                            trailerKey = thisVideo.getString("key");
-                        }
-                        if (thisVideo.has("name")) {
-                            trailerTitle = thisVideo.getString("name");
-                        }
+            if (baseJsonResponse.has("results")) {
+                JSONArray videoArray = baseJsonResponse.getJSONArray("results");
+                for (int v = 0; v < videoArray.length(); v++) {
+                    JSONObject thisVideo = videoArray.getJSONObject(v);
+                    if (thisVideo.has("id")) {
+                        trailerId = thisVideo.getString("id");
+                    }
+                    if (thisVideo.has("key")) {
+                        trailerKey = thisVideo.getString("key");
+                    }
+                    if (thisVideo.has("name")) {
+                        trailerTitle = thisVideo.getString("name");
                     }
                 }
                 Trailer trailer = new Trailer(trailerKey, trailerId, trailerTitle);

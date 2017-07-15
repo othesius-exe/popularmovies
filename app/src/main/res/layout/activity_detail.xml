@@ -85,10 +85,11 @@
                 android:background="@color/colorAccent" />
 
             <LinearLayout
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:id="@+id/trailer_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:isScrollContainer="true"/>
 
             <View
                 android:layout_width="match_parent"

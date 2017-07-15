@@ -244,17 +244,20 @@ public class DetailActivity extends AppCompatActivity {
             Log.i(LOG_TAG, "Load finished." + data);
             if (data != null && !data.isEmpty()) {
                 mTrailerList.addAll(data);
+                Log.v(LOG_TAG, "Trailers in list: " + mTrailerList.toString());
                 LayoutInflater inflater = (LayoutInflater) DetailActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 for (Trailer t : mTrailerList) {
                     LinearLayout trailerList = (LinearLayout) findViewById(R.id.trailer_list_view);
                     mTrailerId = t.getTrailerId();
                     mTrailerKey = t.getTrailerKey();
-                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
+                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerId + DEFAULT_KEY;
                     mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
                     View v = inflater.inflate(R.layout.trailer_item, null);
                     TextView titleView = (TextView) v.findViewById(R.id.trailer_title_view);
                     titleView.setText(t.getTrailerTitle());
                     ImageView trailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
+                    trailerImage.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 400));
+                    trailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(trailerImage);
                     trailerList.addView(v);
 

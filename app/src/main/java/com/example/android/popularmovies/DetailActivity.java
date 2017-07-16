@@ -4,18 +4,17 @@ import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -33,7 +32,6 @@ import com.example.android.popularmovies.data.UserFavoritesDbHelper;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -74,10 +72,12 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mSynopsisView;
     private ImageView mTrailerImage;
     private ListView mReviewList;
-    private ListView mTrailerListView;
+    private RecyclerView mTrailerListView;
     private ReviewAdapter mReviewAdapter;
-    private TrailerAdapter mTrailerAdapter;
-    private LinearLayout mTrailerLayout;
+    private ReviewTrailerAdapter mReviewTrailerAdapter;
+    private ArrayList<Object> mObjects;
+    private LinearLayoutManager mLayoutManager;
+
 
     // Loader Managers
     private LoaderManager mLoaderManager;
@@ -106,8 +106,11 @@ public class DetailActivity extends AppCompatActivity {
         mLoaderManager = getSupportLoaderManager();
         mTrailerList = new ArrayList<>();
         mReviewArrayList = new ArrayList<>();
+        mObjects = new ArrayList<>();
         mReviewList = (ListView) findViewById(R.id.review_list);
+        mTrailerListView = (RecyclerView) findViewById(R.id.trailer_list_view);
         mDbHelper = new UserFavoritesDbHelper(this);
+        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         API_KEY = getResources().getString(R.string.apiKeys);
 
@@ -243,38 +246,18 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public void onLoadFinished(Loader<ArrayList<Trailer>> loader, ArrayList<Trailer> data) {
             Log.i(LOG_TAG, "Load finished." + data);
-            if (mTrailerLayout != null && mTrailerLayout.getChildCount() > 0) {
-                mTrailerLayout.removeAllViews();
-            }
             if (data != null && !data.isEmpty()) {
                 mTrailerList.addAll(data);
+                mObjects.addAll(data);
+                mReviewTrailerAdapter = new ReviewTrailerAdapter(mObjects);
+                mTrailerListView.setLayoutManager(mLayoutManager);
+                mTrailerListView.setAdapter(mReviewTrailerAdapter);
+
                 Log.v(LOG_TAG, "Trailers in list: " + mTrailerList.toString());
-                LayoutInflater inflater = (LayoutInflater) DetailActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 for (Trailer t : mTrailerList) {
-                    mTrailerLayout = (LinearLayout) findViewById(R.id.trailer_list_view);
                     mTrailerId = t.getTrailerId();
                     mTrailerKey = t.getTrailerKey();
-                    mTrailerImagePath = DEFAULT_TRAILER_IMAGE + mTrailerKey + DEFAULT_KEY;
                     mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
-                    View v = inflater.inflate(R.layout.trailer_item, null);
-                    TextView titleView = (TextView) v.findViewById(R.id.trailer_title_view);
-                    titleView.setText(t.getTrailerTitle());
-                    mTrailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
-                    Picasso.with(DetailActivity.this).load(mTrailerImagePath).into(mTrailerImage);
-
-                    mTrailerImage.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Uri trailerLink = Uri.parse(mYoutubeTrailerPath);
-                            Intent trailerIntent = new Intent(Intent.ACTION_VIEW, trailerLink);
-                            List activities = getPackageManager().queryIntentActivities(trailerIntent, PackageManager.MATCH_DEFAULT_ONLY);
-                            boolean isIntentSafe = activities.size() > 0;
-                            if (isIntentSafe) {
-                                startActivity((trailerIntent));
-                            }
-                        }
-                    });
-                    mTrailerLayout.addView(v);
                 }
             }
         }

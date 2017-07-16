@@ -28,7 +28,11 @@ public class Movie implements Parcelable {
     // Movie Summary:
     private String mSynopsis;
 
-    private boolean isFavorite;
+    // Is Favorite
+    private boolean mIsFavorite;
+    private int notFavorite = 0;
+    private int isFavorite = 1;
+
 
     public Movie(String title, Double rating, String releaseInfo, String image, String synopsis, int id) {
         mTitle = title;
@@ -64,11 +68,16 @@ public class Movie implements Parcelable {
         return mSynopsis;
     }
 
-    public boolean setAsFavorite() {
-        if (!isFavorite) {
-            isFavorite = true;
+    public boolean getIsFavorite() {
+        return mIsFavorite;
+    }
+
+    public void setIsFavorite(int i) {
+        if (i == notFavorite) {
+            mIsFavorite = false;
+        } else if (i == 1) {
+            mIsFavorite = true;
         }
-        return isFavorite;
     }
 
     // Override toString() to return a string of all included info

@@ -14,8 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -50,8 +49,6 @@ public class DetailActivity extends AppCompatActivity {
     private String DEFAULT_KEY = "/default.jpg";
     private String API_PARAM = "?api_key=";
 
-    private ArrayList<Review> mReviewArrayList;
-
     // Views
     private ImageView mImageView;
     private TextView mTitleView;
@@ -66,6 +63,7 @@ public class DetailActivity extends AppCompatActivity {
     private ArrayList<Object> mTrailers;
     private LinearLayoutManager mTrailerLayoutManager;
     private LinearLayoutManager mReviewLayoutManager;
+    private ImageView mFavoriteImage;
 
     // Loader Managers
     private LoaderManager mLoaderManager;
@@ -82,8 +80,11 @@ public class DetailActivity extends AppCompatActivity {
     private String mPosterPath;
     private Double mRating;
     private String mSummary;
-
+    private boolean mIsFavorite = false;
+    private int mNotFavoriteInt = 0;
+    private int mFavoriteInt = 1;
     private ContentValues mValues;
+    private Movie mMovie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +103,9 @@ public class DetailActivity extends AppCompatActivity {
         // RecyclerViews to hold Trailers and Reviews
         mReviewListView = (RecyclerView) findViewById(R.id.review_list);
         mTrailerListView = (RecyclerView) findViewById(R.id.trailer_list_view);
+
+        // Favorite Image
+        mFavoriteImage = (ImageView) findViewById(R.id.favorite_image);
 
         // Database Helper
         mDbHelper = new UserFavoritesDbHelper(this);
@@ -122,15 +126,35 @@ public class DetailActivity extends AppCompatActivity {
         // Get the intent that opened this activity
         // Extract the movie details that were passed along
         Intent intent = getIntent();
-        Movie movie = intent.getParcelableExtra("movie");
-        if (movie != null) {
+        mMovie = intent.getParcelableExtra("movie");
+        if (mMovie != null) {
 
-            mTitle = movie.getTitle();
-            mMovieId = movie.getMovieId();
-            mRating = movie.getRating();
-            mDate = movie.getReleaseInfo();
-            mSummary = movie.getSynopsis();
-            mPosterPath = movie.getImagePoster();
+            mTitle = mMovie.getTitle();
+            mMovieId = mMovie.getMovieId();
+            mRating = mMovie.getRating();
+            mDate = mMovie.getReleaseInfo();
+            mSummary = mMovie.getSynopsis();
+            mPosterPath = mMovie.getImagePoster();
+
+            mIsFavorite = mMovie.getIsFavorite();
+            setFavoriteImage();
+
+            mFavoriteImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mIsFavorite) {
+                        mIsFavorite = true;
+                        setFavoriteImage();
+                        addToFavorites();
+                        mMovie.setIsFavorite(mFavoriteInt);
+                    } else {
+                        mIsFavorite = false;
+                        setFavoriteImage();
+                        removeFromFavorites();
+                        mMovie.setIsFavorite(mNotFavoriteInt);
+                    }
+                }
+            });
 
             mTrailerUrl = MOVIE_QUERY_URL + mMovieId + APPEND_VIDEOS + API_PARAM + API_KEY;
             mReviewUrl = MOVIE_QUERY_URL + mMovieId + APPEND_REVIEWS + API_PARAM + API_KEY;
@@ -163,25 +187,12 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.detail_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.action_add_to_favorites:
-                addToFavorites();
-                break;
-            case R.id.action_remove_from_favorites:
-                removeFromFavorites();
+    private void setFavoriteImage() {
+        if (mIsFavorite) {
+            mFavoriteImage.setImageResource(R.drawable.ic_favorite_black_24px);
+        } else if (!mIsFavorite) {
+            mFavoriteImage.setImageResource(R.drawable.ic_favorite_border_black_24px);
         }
-
-        return true;
     }
 
     /**
@@ -206,9 +217,9 @@ public class DetailActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "New Row ID: " + newFavoriteId);
 
         if (newFavoriteId == -1) {
-            Toast.makeText(this, "Movie not added to favorites.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Could not add " + mTitle + " to favorites!", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Movie successfully added to favorites!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, mTitle + " successfully added to favorites!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -218,14 +229,13 @@ public class DetailActivity extends AppCompatActivity {
     private void removeFromFavorites() {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
-
         if (FavoritesEntry.CONTENT_URI != null) {
             int rowsDeleted = db.delete(FavoritesEntry.TABLE_NAME, null , null);
 
             if (rowsDeleted == 0) {
                 Toast.makeText(this, "Failed to remove item or item does not exist.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Movie removed from favorites!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, mTitle + " removed from favorites!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -289,5 +299,18 @@ public class DetailActivity extends AppCompatActivity {
         public void onLoaderReset(Loader<ArrayList<Review>> loader) {
             mTrailerAdapter.notifyDataSetChanged();
         }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelable("movie", mMovie);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mMovie = savedInstanceState.getParcelable("movie");
     }
 }

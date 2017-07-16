@@ -28,7 +28,6 @@ public class ReviewTrailerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private String DEFAULT_KEY = "/default.jpg";
     private String YOUTUBE_PATH = "https://www.youtube.com/watch?v=";
     private String mTrailerKey;
-    private String mTrailerId;
     private String mFullYoutubePath;
     private Context mContext;
 

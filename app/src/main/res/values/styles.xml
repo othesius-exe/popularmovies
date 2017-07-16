@@ -22,6 +22,7 @@
         <item name="android:gravity">center</item>
         <item name="android:textSize">18sp</item>
     </style>
+
     <style name="synopsis_style">
         <item name="android:textColor">@color/primaryText</item>
         <item name="android:paddingTop">8dp</item>
@@ -55,6 +56,14 @@
         <item name="android:paddingBottom">@dimen/review_text_padding_bottom</item>
         <item name="android:textSize">@dimen/review_content_text_size</item>
         <item name="android:typeface">monospace</item>
+    </style>
+
+    <style name="favorites_text_style">
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">@dimen/review_text_padding_start</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primaryText</item>
     </style>
 
     <style name="trailer_title_style">

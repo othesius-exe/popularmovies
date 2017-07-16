@@ -1,6 +1,5 @@
 package com.example.android.popularmovies;
 
-import android.app.ActionBar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -17,13 +16,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,14 +50,7 @@ public class DetailActivity extends AppCompatActivity {
     private String DEFAULT_KEY = "/default.jpg";
     private String API_PARAM = "?api_key=";
 
-    private ArrayList<Trailer> mTrailerList;
     private ArrayList<Review> mReviewArrayList;
-
-    // Trailer Variables
-    private String mTrailerId;
-    private String mTrailerKey;
-    private String mTrailerImagePath;
-    private String mYoutubeTrailerPath;
 
     // Views
     private ImageView mImageView;
@@ -70,14 +58,14 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mRatingView;
     private TextView mDateView;
     private TextView mSynopsisView;
-    private ImageView mTrailerImage;
-    private ListView mReviewList;
     private RecyclerView mTrailerListView;
-    private ReviewAdapter mReviewAdapter;
-    private ReviewTrailerAdapter mReviewTrailerAdapter;
-    private ArrayList<Object> mObjects;
-    private LinearLayoutManager mLayoutManager;
-
+    private RecyclerView mReviewListView;
+    private ReviewTrailerAdapter mReviewAdapter;
+    private ReviewTrailerAdapter mTrailerAdapter;
+    private ArrayList<Object> mReviews;
+    private ArrayList<Object> mTrailers;
+    private LinearLayoutManager mTrailerLayoutManager;
+    private LinearLayoutManager mReviewLayoutManager;
 
     // Loader Managers
     private LoaderManager mLoaderManager;
@@ -103,15 +91,26 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
-        mLoaderManager = getSupportLoaderManager();
-        mTrailerList = new ArrayList<>();
-        mReviewArrayList = new ArrayList<>();
-        mObjects = new ArrayList<>();
-        mReviewList = (ListView) findViewById(R.id.review_list);
-        mTrailerListView = (RecyclerView) findViewById(R.id.trailer_list_view);
-        mDbHelper = new UserFavoritesDbHelper(this);
-        mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
+        // Loader Manager for your Loader Callbacks
+        mLoaderManager = getSupportLoaderManager();
+
+        // Objects Array of Trailers and Reviews to send to the RecyclerAdapter
+        mReviews = new ArrayList<>();
+        mTrailers = new ArrayList<>();
+
+        // RecyclerViews to hold Trailers and Reviews
+        mReviewListView = (RecyclerView) findViewById(R.id.review_list);
+        mTrailerListView = (RecyclerView) findViewById(R.id.trailer_list_view);
+
+        // Database Helper
+        mDbHelper = new UserFavoritesDbHelper(this);
+
+        // Layout Managers for Reviews and Trailers
+        mTrailerLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mReviewLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        // My API key
         API_KEY = getResources().getString(R.string.apiKeys);
 
         // Make sure that we are still connected
@@ -149,14 +148,6 @@ public class DetailActivity extends AppCompatActivity {
             mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             Picasso.with(this).load(fullImagePath).into(mImageView);
 
-            mReviewList.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    v.getParent().requestDisallowInterceptTouchEvent(true);
-                    return false;
-                }
-            });
-
             mTitleView = (TextView) findViewById(R.id.detail_title_view);
             mTitleView.setText(mTitle);
 
@@ -193,6 +184,9 @@ public class DetailActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Add Item to the database
+     */
     private void addToFavorites() {
         // Get the database to write to
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -218,6 +212,9 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Remove item from the database
+     */
     private void removeFromFavorites() {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -240,31 +237,26 @@ public class DetailActivity extends AppCompatActivity {
 
         @Override
         public Loader<ArrayList<Trailer>> onCreateLoader(int id, Bundle args) {
+            mTrailers.clear();
             return new TrailerLoader(DetailActivity.this, mTrailerUrl);
         }
 
         @Override
         public void onLoadFinished(Loader<ArrayList<Trailer>> loader, ArrayList<Trailer> data) {
             Log.i(LOG_TAG, "Load finished." + data);
+            mTrailers.clear();
             if (data != null && !data.isEmpty()) {
-                mTrailerList.addAll(data);
-                mObjects.addAll(data);
-                mReviewTrailerAdapter = new ReviewTrailerAdapter(mObjects);
-                mTrailerListView.setLayoutManager(mLayoutManager);
-                mTrailerListView.setAdapter(mReviewTrailerAdapter);
-
-                Log.v(LOG_TAG, "Trailers in list: " + mTrailerList.toString());
-                for (Trailer t : mTrailerList) {
-                    mTrailerId = t.getTrailerId();
-                    mTrailerKey = t.getTrailerKey();
-                    mYoutubeTrailerPath = YOUTUBE_PATH + mTrailerKey;
-                }
+                mTrailers.addAll(data);
+                mTrailerAdapter = new ReviewTrailerAdapter(DetailActivity.this, mTrailers);
+                mTrailerLayoutManager.scrollToPosition(0);
+                mTrailerListView.setLayoutManager(mTrailerLayoutManager);
+                mTrailerListView.setAdapter(mTrailerAdapter);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<ArrayList<Trailer>> loader) {
-
+            mTrailerAdapter.notifyDataSetChanged();
         }
     }
 
@@ -276,6 +268,7 @@ public class DetailActivity extends AppCompatActivity {
         // Create the Loader with the url to fetch reviews
         @Override
         public Loader<ArrayList<Review>> onCreateLoader(int id, Bundle args) {
+            mReviews.clear();
             return new ReviewLoader(DetailActivity.this, mReviewUrl);
         }
 
@@ -283,40 +276,18 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public void onLoadFinished(Loader<ArrayList<Review>> loader, ArrayList<Review> data) {
             Log.i(LOG_TAG, "Load finished." + data);
+            mReviews.clear();
             if (data != null && !data.isEmpty()) {
-                mReviewArrayList.addAll(data);
-                mReviewAdapter = new ReviewAdapter(DetailActivity.this, mReviewArrayList);
-                mReviewList.setAdapter(mReviewAdapter);
-                setListViewHeightBasedOnChildren(mReviewList);
+                mReviews.addAll(data);
+                mReviewAdapter = new ReviewTrailerAdapter(DetailActivity.this, mReviews);
+                mReviewListView.setLayoutManager(mReviewLayoutManager);
+                mReviewListView.setAdapter(mReviewAdapter);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<ArrayList<Review>> loader) {
-
+            mTrailerAdapter.notifyDataSetChanged();
         }
-    }
-
-    // Sets the parameters for the ListView which holds the Review Objects
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null) {
-            return;
-        }
-
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        int totalHeight = 0;
-        View view = null;
-        for (int i = 0; i < listAdapter.getCount(); i++) {
-            view = listAdapter.getView(i, view, listView);
-            if (i == 0) {
-                view.setLayoutParams(new ViewGroup.LayoutParams((desiredWidth), ActionBar.LayoutParams.WRAP_CONTENT));
-            }
-            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            totalHeight += view.getMeasuredHeight();
-        }
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() -1));
-        listView.setLayoutParams(params);
     }
 }

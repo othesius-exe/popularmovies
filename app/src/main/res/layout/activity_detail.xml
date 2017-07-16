@@ -105,7 +105,7 @@
                 android:layout_height="@dimen/divider_height"
                 android:background="@color/colorAccent" />
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/review_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

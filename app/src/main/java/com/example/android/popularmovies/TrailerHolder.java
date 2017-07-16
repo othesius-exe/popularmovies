@@ -14,10 +14,13 @@ public class TrailerHolder extends RecyclerView.ViewHolder {
     private ImageView mTrailerImage;
     private TextView mTitleText;
 
+
     public TrailerHolder(View v) {
         super(v);
         mTrailerImage = (ImageView) v.findViewById(R.id.trailer_image_view);
         mTitleText = (TextView) v.findViewById(R.id.trailer_title_view);
+        mTrailerImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
     }
 
     public ImageView getImageView() {

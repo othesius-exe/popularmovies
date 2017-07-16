@@ -20,7 +20,8 @@
         android:layout_height="@dimen/trailer_image_height"
         android:paddingTop="@dimen/trailer_image_padding_top"
         android:paddingBottom="@dimen/trailer_image_padding_bottom"
-        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
         android:src="@drawable/tmdb" />
 
 </LinearLayout>
